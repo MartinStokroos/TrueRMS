@@ -181,11 +181,11 @@ void loop() { // loop must run at 1kHz
 ```
 
 ## Examples
-`Measure_avg.ino` - In this example, the average value of the ADC input voltage is measured. It can for example be used for noisy dc voltages.
+`Measure_avg.ino` - This example shows how measure the average value of a signal from the ADC input. It can be used for example to measure noisy dc voltages.
 
 `Measure_rms.ino` -  With this example, the rms-value of the ADC input voltage is determined. 
 
-`AC_powermeter.ino` - This is a complete AC-power measurement application. It needs the voltage and a voltage representation of the current as input. It determines the apparent power, real power, power factor and the rms-values of the input voltage and current.
+`AC_powermeter.ino` - This is a complete AC-power measurement application. It needs voltage and a voltage representation of the current as input. It determines the apparent power, real power, power factor and the rms-values of the voltage and current.
 
 ## AC measurements with the Arduino
 The easiest way to interface high ac-voltages with the Arduino ADC is by using a voltage transducer, for example the *LV 25-P* voltage transducer from *LEM USA Inc.* Such a transducer provides galvanic isolation, scaling and level shifting in one unit. 

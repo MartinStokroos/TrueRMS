@@ -1,7 +1,7 @@
 # True RMS Library for Arduino
-This repository contains the *TrueRMS* C++ library for Arduino. With this library it is possible to determine the average value and the *rms* (root mean square) or *effective* value of a signal. With this library it is also possible to calculate the (vector)power from both, a voltage and a current signal. The voltage and the voltage representation of a current, can be measured with the ADC, using appropriate input circuitry for  scaling the measured quantity down to a 0-5V range suitable for the Arduino ADC. This library uses a simple method for scaling the units just by setting the full scale peak-to-peak value of the ac input signal. The library is easy portable to other platforms.
+This repository contains the *TrueRMS* C++ library for Arduino. With this library it is possible to determine the average value and the *rms* (root mean square) or *effective* value of a signal. With this library it is also possible to calculate the (vector)power from both, a voltage and a current signal. The voltage and the voltage representation of a current, can be measured with the ADC, using appropriate input circuitry for scaling the measured quantity down to a 0-5V range, suitable for the Arduino ADC. This library uses a simple method for scaling the units just by setting the full scale peak-to-peak value of the ac input signal. The library is easy portable to other platforms.
 
-## Functionality
+## Function
 The following library classes are implemented::
 
 * `Average`
@@ -72,7 +72,7 @@ The public defined variables are:
 
 `float rmsVal`, the rms value result,
 
-`int dcBias`, the dcBias value in ADC-units, when BLR_ON,
+`int dcBias`, the dcBias value in ADC-units, only relevant when BLR_ON,
 
 `bool acquire` status bit, TRUE if scan is pending.
 
@@ -100,19 +100,19 @@ The public defined variables are:
 
 `int instVal2`, the value of the current acquired sample of the current,
 
-`float rmsVal1`, the RMS value1 (voltage)
+`float rmsVal1`, RMS value1 (voltage)
 
-`float rmsVal2`, the RMS value2 (current)
+`float rmsVal2`, RMS value2 (current)
 
-`int dcBias1`, the dcBias1 value in ADC-units, when BLR_ON,
+`int dcBias1`, the dcBias1 value in ADC-units, only relevant when BLR_ON,
 
-`int dcBias2`, the dcBias2 value in ADC-units, when BLR_ON,
+`int dcBias2`, the dcBias2 value in ADC-units, only relevant when BLR_ON,
 
 `float apparentPwr`, the apparent power,
 
-`float realPwr`, the real power,
+`float realPwr`, real power,
 
-`float PF`, the power factor,
+`float PF`, power factor,
 
 `bool acquire`, status bit, TRUE if scan is pending.
 
@@ -154,7 +154,8 @@ The rms window is 40 samples, which means that the window covers two 50Hz cycles
 The ADC bit resolution is 10bit (Arduino UNO).
 
 BLR_ON means that the baseline restoration is switched on. To capture an AC-signal with the ADC, the zero value of the signal must be shifted  towards the middle of the ADC range by adding a DC-offset voltage with the ADC input circuitry. This offset must be corrected afterwards in software by subtracting a constant value. This correction can be made automatically with BLR_ON and calibration is not needed.
-![e-puck](figures/figure1.png)
+![Signal Range](figures/figure1.png)
+
 The blue line is the maximum scaled input signal with a voltage swing of 5V and biased on 2.5V. The green line shows an input signal with an amplitude of 1V and this will measure 1V/sqrt(2) = 0.71Vrms. 
 
 The Acquisition can be continously with the option CNT_SCAN or it can be triggered for a as single acquisition scan at any moment with SGL_SCAN. 
@@ -186,10 +187,10 @@ void loop() { // loop must run at 1kHz
 `AC_powermeter.ino` - This is a complete AC-power measurement application. It needs the voltage and a voltage representation of the current as input. It determines the apparent power, real power, power factor and the rms-values of the input voltage and current.
 
 ## AC measurements with the Arduino
-The easiest way to interface high ac-voltage inputs with the ADC is by using a voltage transducer, for example the *LV 25-P* voltage transducer from *LEM USA Inc.* Such transducer provides galvanic isolation, scaling and level shifting in one unit. 
-For current sensing, *LEM* also manufactures transducers like the *LEM_LA55-P*, with the same advantages as for the voltage transducer.
+The easiest way to interface high ac-voltages with the Arduino ADC is by using a voltage transducer, for example the *LV 25-P* voltage transducer from *LEM USA Inc.* Such a transducer provides galvanic isolation, scaling and level shifting in one unit. 
+For current sensing, *LEM* also manufactures transducers like the *LEM_LA55-P* with the same advantages as for the voltage transducer.
 
-If one prefers to build input scaling circuits from discrete components, a thorough design description is given in the application note [tiduay6c.pdf](http://www.ti.com/lit/ug/tiduay6c/tiduay6c.pdf) of the Voltage Source Inverter Reference Design from Texas Instruments Incorporated. Take notice of the warnings! The proposed circuits can be adapted easily to the 5V range of the Arduino.
+If one prefers to build input scaling circuits from discrete components, a thorough design description is given in the application note [tiduay6c.pdf](http://www.ti.com/lit/ug/tiduay6c/tiduay6c.pdf) of the Voltage Source Inverter Reference Design from Texas Instruments Incorporated. Take notice of the warnings! The proposed circuits can be adapted easily to the 5V range for the Arduino.
 
 At all times, USE AN ISOLATION TRANSFORMER FOR SAFETY!
 

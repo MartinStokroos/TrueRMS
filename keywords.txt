@@ -1,0 +1,31 @@
+#######################################
+# Syntax coloring map for TrueRMS lib
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Average			KEYWORD1
+Rms			KEYWORD1
+Power			KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin			KEYWORD2
+update			KEYWORD2
+publish			KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+ADC_8BIT		LITERAL1
+ADC_10BIT		LITERAL1
+ADC_12BIT		LITERAL1
+BLR_ON			LITERAL1
+BLR_OFF			LITERAL1
+SGL_SCAN		LITERAL1
+CNT_SCAN		LITERAL1
+

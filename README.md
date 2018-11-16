@@ -1,5 +1,5 @@
 # True RMS Library for Arduino
-This repository contains the *TrueRMS* C++ library for Arduino. With this library it is possible to determine the average value and the *rms* (root mean square) or *effective* value of a signal. With this library it is also possible to calculate the (vector)power from both, a voltage and a current signal. The voltage and the voltage representation of a current, can be measured with the ADC, using appropriate input circuitry for scaling the measured quantity down to a 0-5V range, suitable for the Arduino ADC. This library uses a simple method for scaling the units just by setting the full scale peak-to-peak value of the ac input signal. The library is easy portable to other platforms.
+This repository contains the *TrueRMS* C++ library for Arduino. With this library it is possible to determine the average value and the *rms* (root mean square) or *effective* value of a signal. With this library it is also possible to calculate the (vector)power from both, voltage and current signal. The voltage and the voltage representation of a current, can be measured with the ADC by using appropriate input circuitry for scaling the measured quantity down to the 0-5V range, appropriate for the Arduino ADC. This library uses a simple method for scaling the units only by setting the full scale peak-to-peak value of the ac input signal. The library is easy portable to other platforms.
 
 ## Function
 The following library classes are implemented::
@@ -36,7 +36,7 @@ With:
 
 - `nob` is the bit resolution of the input signal, usually this equals the ADC bit depth. Use the predefined constants: `ADC_8BIT`, `ADC_10BIT`, `ADC_12BIT`.
 
-- `mode` sets the mode in continuous scan / single scan. Use the predefined constants: `CNT_SCAN` or `SGL_SCAN`.
+- `mode` sets the mode in continuous scan or single scan. Use the predefined constants: `CNT_SCAN` or `SGL_SCAN`.
 
 
 The public defined variables are:
@@ -119,20 +119,20 @@ The public defined variables are:
 
 <u>Common Methods</u>
 
-This method starts the acquisition for both, continuous scan and single scan mode:
+This method starts the acquisition for both, the continuous scan and for single scan:
 `void start(void);`
 
 This method stops the acquisition:
 `void stop(void);`
 
-The method update must be called on basis of a regular time interval to obtain accurate readings. The loop iteration time defines the sample rate. `Value` is the (instantaneous) input sample value:
+Update must be called on basis of a regular time interval to obtain accurate readings. The loop iteration time defines the sample rate. `Value` is the (instantaneous) sample value:
 `void update(int Value);`
 
-Calculates the output value(s) from the last acquisition run:
+Publish calculates the output value(s) from the last acquisition run:
 `void publish(void);`
 
 ## Usage
-* First create an instance of the library object, for example here we define *gridVolt*:
+* First create an instance of the library object, for example we define *gridVolt*:
 ```
 Rms gridVolt;
 ```
@@ -148,20 +148,20 @@ The arguments mean:
 
 The full ADC range (0 to 5Volts) represents a signal peak-to-peak value of 700V. This equals a voltage amplitude of 350V or 247.5Vrms for a sine wave.
 
-The rms window is 40 samples, which means that the window covers two 50Hz cycles, when sampled with 1000 samples/sec.
+The rms window is 40 samples, which means that the window covers two 50Hz cycles, when sampling at a rate of 1000 samples/sec.
 
 The ADC bit resolution is 10bit (Arduino UNO).
 
-BLR_ON means that the baseline restoration is switched on. To capture an AC-signal with the ADC, the zero value of the signal must be shifted  towards the middle of the ADC range by adding a DC-offset voltage with the ADC input circuitry. This offset must be corrected afterwards in software by subtracting a constant value. This correction can be made automatically with BLR_ON and calibration is not needed.
-In figure 1 The blue line is the maximum scaled input signal with a voltage swing of 5V and biased on 2.5V. The green line shows an input signal with an amplitude of 1V and this will measure 1V/sqrt(2) = 0.71Vrms. 
+BLR_ON means that the baseline restoration is switched on. To capture an AC-signal with the ADC, the zero value of the signal must be shifted towards the mid point of the ADC range by adding a DC-offset voltage with the ADC input circuitry. This offset must be corrected afterwards in software by subtracting a constant value from the ADC value. This correction can be done automatically with BLR_ON and calibration is not needed.
+In figure 1, the blue line indicates the maximum scaled input signal with a voltage swing of 5V and biased on 2.5V. The green line shows an input signal with an amplitude of 1V and this will measure 1V/sqrt(2) = 0.71Vrms. 
 
-The Acquisition can be continously with the option CNT_SCAN or it can be triggered for a as single acquisition scan at any moment with SGL_SCAN.
+With the option CNT_SCAN, the acquisition is set to the continous mode. The acquisition will restart automatically after the last sampling scan.
 
 ![Figure 1](figures/figure1.png)
 
- * Call `gridVolt.update(int adcVal);` from the main loop or from an Interrupt Service Routine (ISR). Make shure that the loop iterates at the frequency of 1000Hz.
+ * Call `gridVolt.update(int adcVal);` from the main loop or from an Interrupt Service Routine (ISR). Make sure that the loop iterates with 1000Hz.
  
- * Calculate the results with `gridVolt.publish()` and obtain the rms value with: `Voltage = gridVolt.rmsVal;`
+ * Calculate the results with `gridVolt.publish()` and obtain the rms value with: `float Voltage = gridVolt.rmsVal;`
  
 ``` 
 void loop() { // loop must run at 1kHz
@@ -186,10 +186,10 @@ void loop() { // loop must run at 1kHz
 `AC_powermeter.ino` - This is a complete AC-power measurement application. It needs voltage and a voltage representation of the current as input. It determines the apparent power, real power, power factor and the rms-values of the voltage and current.
 
 ## AC measurements with the Arduino
-The easiest way to interface high ac-voltages with the Arduino ADC is by using a voltage transducer, for example the *LV 25-P* voltage transducer from *LEM USA Inc.* Such a transducer provides galvanic isolation, scaling and level shifting in one unit. 
-For current sensing, *LEM* also manufactures transducers like the *LEM_LA55-P* with the same advantages as for the voltage transducer.
+The easiest way to interface high ac-voltages with the Arduino ADC is by using a voltage transducer, for example the *LV 25-P* voltage transducer from *LEM USA Inc.* This transducer provides galvanic isolation, scaling and level shifting in one device. 
+For current sensing, *LEM* also manufactures transducers like the *LEM_LA55-P*, with the same advantages as the voltage transducer.
 
-If one prefers to build input scaling circuits from discrete components, a thorough design description is given in the application note [tiduay6c.pdf](http://www.ti.com/lit/ug/tiduay6c/tiduay6c.pdf) of the Voltage Source Inverter Reference Design from Texas Instruments Incorporated. Take notice of the warnings! The proposed circuits can be adapted easily to the 5V range for the Arduino.
+If one prefers to build input scaling circuits from discrete components, a thorough design description has been given in the application note [tiduay6c.pdf](http://www.ti.com/lit/ug/tiduay6c/tiduay6c.pdf) for the Voltage Source Inverter Reference Design of Texas Instruments Incorporated. Take notice of the warnings! The proposed circuits can be adapted easily to the 0-5V range for the Arduino.
 
 At all times, USE AN ISOLATION TRANSFORMER FOR SAFETY!
 

@@ -1,8 +1,8 @@
 # True RMS Library for Arduino
-This repository contains the *TrueRMS* C++ library for Arduino. With this library it is possible to determine the average value and the *rms* (root mean square) or *effective* value of a signal. With this library it is also possible to calculate the (vector)power from both, voltage and current signal. The voltage and the voltage representation of a current, can be measured with the ADC by using appropriate input circuitry for scaling the measured quantity down to the 0-5V range, appropriate for the Arduino ADC. This library uses a simple method for scaling the units only by setting the full scale peak-to-peak value of the ac input signal. The library is easy portable to other platforms.
+This repository contains the *TrueRMS* C++ library for Arduino. With this library it is possible to determine the average value and the *rms* (root mean square) or *effective* value of a signal. With this library it is also possible to calculate the (vector)power from voltage and current signals. The voltage and the voltage representation of a current, can be measured with the ADC by using appropriate input circuitry for scaling the measured quantity down within the 0-5V range appropriate for the Arduino ADC. This library uses a simple method for scaling the units only by setting the full scale peak-to-peak value of the ac input signal. The library is easy portable to other platforms.
 
 ## Function
-The following library classes are implemented::
+The following library classes are implemented:
 
 * `Average`
 * `Rms`
@@ -179,17 +179,16 @@ void loop() { // loop must run at 1kHz
 ```
 
 ## Examples
-`Measure_avg.ino` - This example shows how measure the average value of a signal from the ADC input. It can be used for example to measure noisy dc voltages.
+`Measure_avg.ino` - This example shows how measure the average value of a signal from the ADC input. It can be used for example for measuring noisy dc voltages.
 
 `Measure_rms.ino` -  With this example, the rms-value of the ADC input voltage is determined. 
 
 `AC_powermeter.ino` - This is a complete AC-power measurement application. It needs voltage and a voltage representation of the current as input. It determines the apparent power, real power, power factor and the rms-values of the voltage and current.
 
 ## AC measurements with the Arduino
-The easiest way to interface high ac-voltages with the Arduino ADC is by using a voltage transducer, for example the *LV 25-P* voltage transducer from *LEM USA Inc.* This transducer provides galvanic isolation, scaling and level shifting in one device. 
-For current sensing, *LEM* also manufactures transducers like the *LEM_LA55-P*, with the same advantages as the voltage transducer.
+The easiest way to interface ac high voltages with the Arduino ADC is by using a voltage transducer, for example the *LV 25-P* voltage transducer from *LEM USA Inc.* This transducer provides galvanic isolation, scaling and level shifting in a single device. For current sensing, *LEM* also manufactures transducers like the *LEM_LA55-P*, with the same advantages as for the voltage transducer.
 
-If one prefers to build input scaling circuits from discrete components, a thorough design description has been given in the application note [tiduay6c.pdf](http://www.ti.com/lit/ug/tiduay6c/tiduay6c.pdf) for the Voltage Source Inverter Reference Design of Texas Instruments Incorporated. Take notice of the warnings! The proposed circuits can be adapted easily to the 0-5V range for the Arduino.
+If one prefers to build input scaling circuits from discrete components, a detailed design description is given in the application note [tiduay6c.pdf](http://www.ti.com/lit/ug/tiduay6c/tiduay6c.pdf) of the Voltage Source Inverter Reference Design from Texas Instruments Incorporated. Take notice of the warnings! The proposed circuits can be adapted easily to the 0-5V range for the Arduino.
 
 At all times, USE AN ISOLATION TRANSFORMER FOR SAFETY!
 

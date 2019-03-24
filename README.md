@@ -127,7 +127,7 @@ This method starts the acquisition for both, the continuous scan and for single 
 This method stops the acquisition:
 `void stop(void);`
 
-Update must be called on basis of a regular time interval to obtain accurate readings. The loop iteration time defines the sample rate. `Value` is the (instantaneous) sample value:
+`update()` must be called on basis of a regular time interval to obtain accurate readings. The loop iteration time defines the sample rate. `Value` is the (instantaneous) sample value:
 
 `void update(int Value);`
 
@@ -182,14 +182,14 @@ void loop() { // loop must run at 1kHz
 ```
 
 ## Examples
-`Measure_avg.ino` - This example shows how measure the average value of a signal from the ADC input. It can be used for example for measuring noisy dc voltages.
+`Measure_avg.ino` - This example shows how to calculate the average value of a signal measured with the ADC. It can be used for example when measuring noisy DC voltages.
 
-`Measure_rms.ino` -  With this example, the rms-value of the ADC input voltage is determined. 
+`Measure_rms.ino` -  With this example, the RMS-value of the ADC input voltage is determined. 
 
 `AC_powermeter.ino` - This is a complete AC-power measurement application. It needs voltage and a voltage representation of the current as input. It determines the apparent power, real power, power factor and the rms-values of the voltage and current.
 
 ## AC measurements with the Arduino
-The simplest way to interface ac high voltages with the Arduino ADC is by using a voltage transducer, for example the *LV 25-P* voltage transducer from *LEM USA Inc.* This transducer provides galvanic isolation, scaling and level shifting in a single package. For current sensing, *LEM* also manufactures the *LEM_LA55-P*, with the same advantages as for the voltage transducer.
+The simplest way to interface AC high voltages with the Arduino ADC is by using a voltage transducer, for example the *LV 25-P* voltage transducer from *LEM USA Inc.* This transducer provides galvanic isolation, scaling and level shifting in a single package. For current sensing, *LEM* also manufactures the *LEM_LA55-P*, with the same advantages as for the voltage transducer.
 
 If one prefers to build input scaling circuits from discrete components, a detailed design description is given in the application note [tiduay6c.pdf](http://www.ti.com/lit/ug/tiduay6c/tiduay6c.pdf) belonging to the Voltage Source Inverter Reference Design from Texas Instruments Incorporated. Take notice to the warnings! The proposed circuits can easily be adapted to the 0-5V range for the Arduino.
 

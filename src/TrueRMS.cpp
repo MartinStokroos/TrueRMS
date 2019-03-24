@@ -24,15 +24,20 @@
 *
 *
 * Changes compared to version 1.0.0:
-* - Introduced a software flag to indicate the completion of a single scan acquisition run. This flag is cleared after calling publish().
+* - Introduced a software flag to indicate the completion of a single scan acquisition run. This flag is cleared after calling
+* publish().
+*
 * - Introduced the Rms2 and Power2 classes. These version 2 classes have a better performance when used in an interrupt service 
-* routine, by spreading out the processing burden over the different sample time slots in the RMS window. Rms2 occupies one extra sample 
-* time slot for doing the baseline restoration calculation (when BLR is on).
-* - The method update() of the Power2 class has been split up in: update1() and update2(). update1() processes the first sample (for example, 
-* a sample of the voltage signal) and power2() processes the second sample (the current signal, or vice versa). Sampling voltage and current 
-* usually happens sequentially in a multiplexed ADC. Furthermore, an extra sample time slot (window length +1) is occupied by the baseline 
-* restoration calculation (when BLR is on).
+* routine, by spreading out the processing burden over the different sample time slots in the RMS window. Rms2 occupies one 
+* extra sample time slot (window length+1) for doing the baseline restoration calculation (when BLR is on).
+*
+* - The method update() of the Power2 class has been split up in: update1() and update2(). update1() is called first and 
+* processes the first sample (for example, a sample of the input voltage) and power2() processes the second sample (a sample
+* of the input current, or vice versa). Sampling voltage and current usually happens sequentially in a multiplexed ADC.
+* Furthermore, an extra sample time slot (window length+1) is occupied by the baseline restoration calculation (when BLR is on).
+*
 * - When BLR is on, instVal now returns the baseline restored sample value.
+*
 * - The power factor variable is: pf (lowercase letters)
 */
 
@@ -43,8 +48,6 @@
 #else
 #include "WProgram.h"
 #endif
-
-
 
 
 //*********** Init functions ***********//

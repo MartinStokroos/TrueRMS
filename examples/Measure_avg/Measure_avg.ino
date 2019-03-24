@@ -2,8 +2,8 @@
  *
  * File: Measure_avg.ino
  * Purpose: TrueRMS library example project
- * Version: 1.0.0
- * Date: 06-11-2018
+ * Version: 1.0.1
+ * Date: 22-03-2019
  * URL: https://github.com/MartinStokroos/TrueRMS
  * License: MIT License
  *
@@ -30,7 +30,7 @@ void setup() {
   // run once:
 	Serial.begin(115200);
  
-	MeasAvg.begin(VoltRange, AVG_WINDOW, ADC_10BIT, CNT_SCAN);
+	MeasAvg.begin(VoltRange, AVG_WINDOW, ADC_10BIT, CNTS);
   MeasAvg.start();
   
 	nextLoop = micros() + LPERIOD; // Set the loop timer variable for the next loop interval.

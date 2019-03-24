@@ -1,28 +1,31 @@
 # True RMS Library for Arduino
-This repository contains the *TrueRMS* C++ library for Arduino. With this library it is possible to determine the average value and the *rms* (root mean square) or *effective* value of a signal. With this library it is also possible to calculate the (vector)power from voltage and current signals. The voltage and the voltage representation of a current, can be measured with the ADC by using additional input circuitry for scaling the measured quantity down to within the 0-5V range, appropriate for the Arduino ADC. This library uses a simple method for unit scaling, only by setting the full scale peak-to-peak value of the ac input signal. The library is easy portable to other platforms.
+This repository contains the *TrueRMS* C++ library for Arduino. With this library it is possible to calculate the average value and the *rms* (root mean square) or *effective* value of a signal. With this library it is also possible to calculate the (vector)power from both, voltage and current signals. The voltage and the voltage representation of a current, can be measured with the ADC of the Arduino by using appropriate input circuitry for scaling the measured quantities down to within the 0-5V range to be compliant with the Arduino ADC inputs.
+The provided solution uses a simple method for scaling the units. The user only has to define the full scale peak-to-peak value of the ac input signal(s). This library is easy portable to other platforms.
 
 ## Function
 The following library classes are implemented:
 
 * `Average`
 * `Rms`
+* `Rms2`
 * `Power`
+* `Power2`
 
-*Average* calculates the average value over a number of samples, for example from the ADC, *Rms* calculates the root-mean-square value of a signal and  *Power* calculates the power from two input signals, usually voltage and current.
+*Average* calculates the average value from a number of input samples (usually) from the ADC, *Rms* or *Rms2* can be used to calculate the root-mean-square value of a signal and *Power* or *Power2* to calculate the power from voltage and current input.
 
-The following methods exists:
+The following methods exist:
 
-`.begin()`
+`begin()`
 
-`.start()`
+`start()`
 
-`.stop()`
+`stop()`
 
-`.update()`
+`update()` and `update1()`,+`update2()` for the `Power2` class.
 
-`.publish()`
+`publish()`
 
-Initialize the class instance with the member function `begin()`. This method must be called at first to set the scaling, the size of the sample window, the number of bits and the acquisition mode.
+First initialize an instance from a class defined above with the member function `begin()`. This method is to initialize the class and it needs values to set the scaling, the size of the sampling window, the number of bits of the input signal and the acquisition mode (continuous/single).
 
 For the class *Average*, use:
 
@@ -30,13 +33,13 @@ For the class *Average*, use:
 
 With:
 
-- `range` is the maximum expected full swing of the ac-signal (peak-to-peak value).
+- `range` is the maximum expected full swing of the ac input signal (peak-to-peak value).
 
 - `window` the length of the sample window, expressed in number of samples.
 
-- `nob` is the bit resolution of the input signal, usually this equals the ADC bit depth. Use the predefined constants: `ADC_8BIT`, `ADC_10BIT`, `ADC_12BIT`.
+- `nob` is the bit resolution of the input signal (ADC bit depth). Use the predefined constants: `ADC_8BIT`, `ADC_10BIT`, `ADC_12BIT`.
 
-- `mode` sets the mode in continuous scan or single scan. Use the predefined constants: `CNT_SCAN` or `SGL_SCAN`.
+- `mode` sets the mode in continuous scan or single scan. Use the predefined constants: `CNTS` or `SGLS`.
 
 
 The public defined variables are:
@@ -58,12 +61,11 @@ With:
 
 - `window` the length of the sample window expressed in number of samples.
 
-- `nob` is the bit resolution of the input signal, usually this is the ADC bit depth. Use the predefined constants: `ADC_8BIT`, `ADC_10BIT` or 
-`ADC_12BIT`.
+- `nob` is the bit resolution of the input signal, usually this is the ADC bit depth. Use the predefined constants: `ADC_8BIT`, `ADC_10BIT` or `ADC_12BIT`.
 
 - `blr` sets the automatically baseline restoration function on or off. Use the predifined constants: `BLR_ON` or `BLR_OFF`.
 
-- `mode` sets the mode in continuous scan / single scan. Use predifined constants: `CNT_SCAN` or `SGL_SCAN`.
+- `mode` sets the mode in continuous scan / single scan. Use predifined constants: `CNTS` or `SGLS`.
 
 
 The public defined variables are:
@@ -91,7 +93,7 @@ With:
 
 - `blr` sets the automatically baseline restoration function on or off. Use the predifined constants: `BLR_ON` or `BLR_OFF`.
 
-- `mode` sets the mode in continuous scan / single scan. `CNT_SCAN` or `SGL_SCAN`.
+- `mode` sets the mode in continuous scan / single scan. `CNTS` or `SGLS`.
 
 
 The public defined variables are:
@@ -126,6 +128,7 @@ This method stops the acquisition:
 `void stop(void);`
 
 Update must be called on basis of a regular time interval to obtain accurate readings. The loop iteration time defines the sample rate. `Value` is the (instantaneous) sample value:
+
 `void update(int Value);`
 
 Publish calculates the output value(s) from the last acquisition run:
@@ -140,7 +143,7 @@ Rms gridVolt;
 ```
 void setup() {
 	...
-	gridVolt.begin(700, 40, ADC_10BIT, BLR_ON, CNT_SCAN);`
+	gridVolt.begin(700, 40, ADC_10BIT, BLR_ON, CNTS);`
 	...
 }
 ```
@@ -155,7 +158,7 @@ The ADC bit resolution is 10bit (Arduino UNO).
 BLR_ON means that the baseline restoration is switched on. To capture an AC-signal with the ADC, the zero value of the signal must be shifted towards the mid point of the ADC range by adding a DC-offset voltage with the ADC input circuitry. This offset must be corrected afterwards in software by subtracting a constant value from the ADC value. This correction can be done automatically with BLR_ON and calibration is not needed.
 In figure 1, the blue line indicates the maximum scaled input signal with a voltage swing of 5V and biased on 2.5V. The green line shows an input signal with an amplitude of 1V and this will measure 1V/sqrt(2) = 0.71Vrms. 
 
-With the option CNT_SCAN, the acquisition is set to the continous mode. The acquisition will restart automatically after the last sampling scan.
+With the option CNTS, the acquisition is set into the continous mode. The acquisition will restart automatically after the last sampling scan.
 
 ![Figure 1](figures/figure1.png)
 
@@ -186,9 +189,9 @@ void loop() { // loop must run at 1kHz
 `AC_powermeter.ino` - This is a complete AC-power measurement application. It needs voltage and a voltage representation of the current as input. It determines the apparent power, real power, power factor and the rms-values of the voltage and current.
 
 ## AC measurements with the Arduino
-The easiest way to interface ac high voltages with the Arduino ADC is by using a voltage transducer, for example the *LV 25-P* voltage transducer from *LEM USA Inc.* This transducer provides galvanic isolation, scaling and level shifting in a single device. For current sensing, *LEM* also manufactures transducers like the *LEM_LA55-P*, with the same advantages as for the voltage transducer.
+The simplest way to interface ac high voltages with the Arduino ADC is by using a voltage transducer, for example the *LV 25-P* voltage transducer from *LEM USA Inc.* This transducer provides galvanic isolation, scaling and level shifting in a single package. For current sensing, *LEM* also manufactures the *LEM_LA55-P*, with the same advantages as for the voltage transducer.
 
-If one prefers to build input scaling circuits from discrete components, a detailed design description is given in the application note [tiduay6c.pdf](http://www.ti.com/lit/ug/tiduay6c/tiduay6c.pdf) of the Voltage Source Inverter Reference Design from Texas Instruments Incorporated. Take notice of the warnings! The proposed circuits can be adapted easily to the 0-5V range for the Arduino.
+If one prefers to build input scaling circuits from discrete components, a detailed design description is given in the application note [tiduay6c.pdf](http://www.ti.com/lit/ug/tiduay6c/tiduay6c.pdf) belonging to the Voltage Source Inverter Reference Design from Texas Instruments Incorporated. Take notice to the warnings! The proposed circuits can easily be adapted to the 0-5V range for the Arduino.
 
 At all times, USE AN ISOLATION TRANSFORMER FOR SAFETY!
 

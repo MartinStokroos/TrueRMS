@@ -2,8 +2,8 @@
  *
  * File: AC_powermeter.ino
  * Purpose: TrueRMS library example project
- * Version: 1.0.0
- * Date: 15-11-2018
+ * Version: 1.0.1
+ * Date: 22-03-2019
  * URL: https://github.com/MartinStokroos/TrueRMS
  * License: MIT License
  *
@@ -42,7 +42,7 @@ void setup() {
 	// run once:
 	Serial.begin(115200);
  
-	acPower.begin(acVoltRange, acCurrRange, RMS_WINDOW, ADC_10BIT, BLR_ON, SGL_SCAN);
+	acPower.begin(acVoltRange, acCurrRange, RMS_WINDOW, ADC_10BIT, BLR_ON, SGLS);
   acPower.start();
   
 	nextLoop = micros() + LPERIOD; // Set the loop timer variable for the next loop interval.
@@ -68,7 +68,7 @@ void loop() {
 		Serial.print(", ");
 		Serial.print(acPower.realPwr,1);
 		Serial.print(", ");
-		Serial.print(acPower.PF,2);
+		Serial.print(acPower.pf,2);
 		Serial.print(", ");
 		Serial.print(acPower.dcBias1);
 		Serial.print(", ");

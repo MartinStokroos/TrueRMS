@@ -1,9 +1,10 @@
 /*
 *
 * File: TrueRMS.cpp
-* Purpose: Average-, RMS- and AC-power measuring library
-* Version: 1.0.0
-* Date: 07-11-2018
+* Purpose: Average-, RMS- and AC-power measurement library
+* Version: 1.1.0
+* Date: 22-03-2019
+* Release Date: 07-11-2018
 * URL: https://github.com/MartinStokroos/TrueRMS
 * License: MIT License
 *
@@ -21,6 +22,18 @@
 * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
+*
+* Changes compared to version 1.0.0:
+* - Introduced a software flag to indicate the completion of a single scan acquisition run. This flag is cleared after calling publish().
+* - Introduced the Rms2 and Power2 classes. These version 2 classes have a better performance when used in an interrupt service 
+* routine, by spreading out the processing burden over the different sample time slots in the RMS window. Rms2 occupies one extra sample 
+* time slot for doing the baseline restoration calculation (when BLR is on).
+* - The method update() of the Power2 class has been split up in: update1() and update2(). update1() processes the first sample (for example, 
+* a sample of the voltage signal) and power2() processes the second sample (the current signal, or vice versa). Sampling voltage and current 
+* usually happens sequentially in a multiplexed ADC. Furthermore, an extra sample time slot (window length +1) is occupied by the baseline 
+* restoration calculation (when BLR is on).
+* - When BLR is on, instVal now returns the baseline restored sample value.
+* - The power factor variable is: pf (lowercase letters)
 */
 
 #include "TrueRMS.h"
@@ -56,10 +69,37 @@ void Rms::begin(float _range, unsigned char _rmsWindow, unsigned char _adcNob, b
 }
 
 
+void Rms2::begin(float _range, unsigned char _rmsWindow, unsigned char _adcNob, bool _blr, bool _mode) {
+	mode = _mode;
+	blr = _blr;
+	rmsWindow = _rmsWindow;
+	dcBias = pow(2, _adcNob) / 2;	// dc-bias starting value
+	scalingSq = sq(_range) / (float)(_rmsWindow * pow(2, 2*_adcNob));
+	temp_sumSqInstVal=0;
+	sampleIdx=0;
+}
+
+
 void Power::begin(float _range1, float _range2, unsigned char _rmsWindow, unsigned char _adcNob, bool _blr, bool _mode) {
 	mode = _mode;
-	rmsWindow = _rmsWindow;
 	blr = _blr;
+	rmsWindow = _rmsWindow;
+	scaling1 = _range1 / (float)pow(2, _adcNob);
+	scalingSq1 = sq(_range1) / (float)(_rmsWindow * pow(2, 2*_adcNob));
+	scaling2 = _range2 / (float)pow(2, _adcNob);
+	scalingSq2 = sq(_range2) / (float)(_rmsWindow * pow(2, 2*_adcNob));
+	scaling3 = (scaling1 * scaling2) / _rmsWindow;
+	temp_sumSqInstVal1=0;
+	temp_sumSqInstVal2=0;
+	temp_sumInstPwr=0;
+	sampleIdx=0;
+}
+
+
+void Power2::begin(float _range1, float _range2, unsigned char _rmsWindow, unsigned char _adcNob, bool _blr, bool _mode) {
+	mode = _mode;
+	blr = _blr;
+	rmsWindow = _rmsWindow;
 	scaling1 = _range1 / (float)pow(2, _adcNob);
 	scalingSq1 = sq(_range1) / (float)(_rmsWindow * pow(2, 2*_adcNob));
 	scaling2 = _range2 / (float)pow(2, _adcNob);
@@ -73,34 +113,58 @@ void Power::begin(float _range1, float _range2, unsigned char _rmsWindow, unsign
 
 
 void Average::start() {
-	acquire = true;
+	acquire=true;
+	acqRdy=false;
 }
 
 
 void Rms::start() {
-	acquire = true;
+	acquire=true;
+	acqRdy=false;
+}
+
+
+void Rms2::start() {
+	acquire=true;
+	acqRdy=false;
 }
 
 
 void Power::start() {
-	acquire = true;
+	acquire=true;
+	acqRdy=false;
+}
+
+
+void Power2::start() {
+	acquire=true;
+	acqRdy=false;
 }
 
 
 void Average::stop() {
-	acquire = false;
+	acquire=false;
 }
 
 
 void Rms::stop() {
-	acquire = false;
+	acquire=false;
+}
+
+
+void Rms2::stop() {
+	acquire=false;
 }
 
 
 void Power::stop() {
-	acquire = false;
+	acquire=false;
 }
 
+
+void Power2::stop() {
+	acquire=false;
+}
 
 
 
@@ -115,8 +179,9 @@ void Average::update(int _instVal) {
 			sumInstVal = temp_sumInstVal;
 			temp_sumInstVal=0;
 			sampleIdx=0;
-			if(mode == SGL_SCAN) {
+			if(mode == SGLS) { //update status bits
 				acquire=false;
+				acqRdy=true;
 			}
 		}
 		sampleIdx++;
@@ -125,23 +190,25 @@ void Average::update(int _instVal) {
 
 
 void Rms::update(int _instVal) {
-	instVal=_instVal;
 	if(acquire) {
 		if(blr) {
-			instVal = instVal - dcBias; // subtract DC-offset to restore the baseline.
+			instVal = _instVal - dcBias; // subtract DC-offset to restore the baseline.
 			temp_sumInstVal += instVal;
 		}
+		else {
+			instVal=_instVal;
+		}
 		temp_sumSqInstVal += sq((float)instVal);
-
-		if(sampleIdx > rmsWindow-1) {
+		if(sampleIdx == rmsWindow) {
 			sumSqInstVal=temp_sumSqInstVal;
 			if(blr) {
-				sumInstVal = alpha * temp_sumInstVal + (1-alpha) * sumInstVal; // calculate running average of sum instant values.
+				sumInstVal = alpha*temp_sumInstVal + (1-alpha)*sumInstVal; // calculate running average of sum instant values.
 				error = (int)round(sumInstVal / rmsWindow); // calculate error of DC-bias
 				dcBias = dcBias + error; // restore baseline
 				temp_sumInstVal=0;
-				if(mode == SGL_SCAN) {
+				if(mode == SGLS) { //update status bits
 					acquire=false;
+					acqRdy=true;
 				}
 			}
 			temp_sumSqInstVal=0;
@@ -152,21 +219,64 @@ void Rms::update(int _instVal) {
 }
 
 
-void Power::update(int _instVal1, int _instVal2) {
-	instVal1 = _instVal1;
-	instVal2 = _instVal2;
+void Rms2::update(int _instVal) {
 	if(acquire) {
 		if(blr) {
-			instVal1 = instVal1 - dcBias1; // subtract DC-offset to restore the baseline.
+			instVal = _instVal - dcBias; // subtract DC-offset to restore the baseline.
+			if(sampleIdx <= rmsWindow) {
+			temp_sumInstVal += instVal;
+			temp_sumSqInstVal += sq((float)instVal);
+			}
+			if(sampleIdx == rmsWindow) {
+				sumSqInstVal=temp_sumSqInstVal;
+				sumInstVal = alpha*temp_sumInstVal + (1-alpha)*sumInstVal; // calculate running average of sum instant values.
+			}
+			if(sampleIdx == rmsWindow+1) { //additional sample time slot for blr calculation.
+				error = (int)round(sumInstVal / rmsWindow); // calculate error of DC-bias
+				dcBias = dcBias + error; // restore baseline
+				temp_sumInstVal=0;
+				temp_sumSqInstVal=0;
+				sampleIdx=0;
+				if(mode == SGLS) { //update status bits
+					acquire=false;
+					acqRdy=true;
+				}
+			}
+		}
+		else {
+			instVal = _instVal;
+			temp_sumSqInstVal += sq((float)instVal);
+			if(sampleIdx == rmsWindow) {
+				sumSqInstVal=temp_sumSqInstVal;
+				temp_sumSqInstVal=0;
+				sampleIdx=0;
+				if(mode == SGLS) { //update status bits
+					acquire=false;
+					acqRdy=true;
+				}
+			}
+		}
+	sampleIdx++;
+	}
+}
+
+
+void Power::update(int _instVal1, int _instVal2) {
+	if(acquire) {
+		if(blr) {
+			instVal1 = _instVal1 - dcBias1; // subtract DC-offset to restore the baseline.
 			temp_sumInstVal1 += instVal1;
-			instVal2 = instVal2 - dcBias2;
+			instVal2 = _instVal2 - dcBias2;
 			temp_sumInstVal2 += instVal2;
+		} //endif(blr)
+		else {
+			instVal1 = _instVal1;
+			instVal2 = _instVal2;
 		}
 		temp_sumSqInstVal1 += sq(instVal1);
 		temp_sumSqInstVal2 += sq(instVal2);
 		temp_sumInstPwr += instVal1 * instVal2;
-
-		if(sampleIdx > rmsWindow-1){
+		if(sampleIdx == rmsWindow){
 			sumSqInstVal1 = temp_sumSqInstVal1;
 			sumSqInstVal2 = temp_sumSqInstVal2;
 			sumInstPwr = temp_sumInstPwr;
@@ -179,18 +289,100 @@ void Power::update(int _instVal1, int _instVal2) {
 				dcBias2 = dcBias2 + error2;
 				temp_sumInstVal1=0;
 				temp_sumInstVal2=0;
-			}
+			} //endif(blr)
 			temp_sumSqInstVal1=0;
 			temp_sumSqInstVal2=0;
 			temp_sumInstPwr=0;
 			sampleIdx=0;
-			if(mode == SGL_SCAN) {
+			if(mode == SGLS) { //update status bits
 				acquire=false;
+				acqRdy=true;
 			}
 		}
 		sampleIdx++;
-	}
+	} //endif(acquire)
 }
+
+
+void Power2::update1(int _instVal) {
+	if(acquire) {
+		if(blr) {
+			instVal1 = _instVal - dcBias1; // subtract DC-offset to restore the baseline.
+			if(sampleIdx <= rmsWindow) {
+				temp_sumInstVal1 += instVal1;
+				temp_sumSqInstVal1 += sq(instVal1);
+			}
+			if(sampleIdx == rmsWindow) {
+				sumSqInstVal1 = temp_sumSqInstVal1;
+				sumInstVal1 = alpha * temp_sumInstVal1 + (1-alpha) * sumInstVal1; // calculate running average of sum instant values.
+			}
+			if(sampleIdx == rmsWindow+1) { //additional sample time slot for blr calculation
+				error1 = (int)round(sumInstVal1 / rmsWindow); // calculate error of DC-bias
+				dcBias1 = dcBias1 + error1; // restore baseline
+			}
+		} //endif(blr)
+		else {
+			instVal1 = _instVal;
+			temp_sumSqInstVal1 += sq(instVal1);
+
+			if(sampleIdx == rmsWindow) {
+				sumSqInstVal1 = temp_sumSqInstVal1;
+			}
+		}
+	} //endif(acquire)
+}
+
+
+void Power2::update2(int _instVal) {
+		if(acquire) {
+			if(blr) {
+				if(sampleIdx <= rmsWindow) {
+					instVal2 = _instVal - dcBias2;
+					temp_sumInstVal2 += instVal2;
+					temp_sumSqInstVal2 += sq(instVal2);
+					temp_sumInstPwr += instVal1 * instVal2;
+				}
+				if(sampleIdx == rmsWindow) {
+					sumSqInstVal2 = temp_sumSqInstVal2;
+					sumInstPwr = temp_sumInstPwr;
+					sumInstVal2 = alpha * temp_sumInstVal2 + (1-alpha) * sumInstVal2;
+				}
+				if(sampleIdx == rmsWindow+1) {
+					error2 = (int)round(sumInstVal2 / rmsWindow);
+					dcBias2 = dcBias2 + error2;
+					temp_sumInstVal1=0;
+					temp_sumInstVal2=0;
+					temp_sumSqInstVal1=0;
+					temp_sumSqInstVal2=0;
+					temp_sumInstPwr=0;
+					sampleIdx=0;
+					if(mode == SGLS) { //update status bits
+						acquire=false;
+						acqRdy=true;
+					}
+				}
+			} //endif(blr)
+			else {
+				instVal2 = _instVal;
+				temp_sumSqInstVal2 += sq(instVal2);
+				temp_sumInstPwr += instVal1 * instVal2;
+				if(sampleIdx == rmsWindow) {
+					sumSqInstVal2 = temp_sumSqInstVal2;
+					sumInstPwr = temp_sumInstPwr;
+					temp_sumSqInstVal1=0;
+					temp_sumSqInstVal2=0;
+					temp_sumInstPwr=0;
+					sampleIdx=0;
+					if(mode == SGLS) { //update status bits
+						acquire=false;
+						acqRdy=true;
+					}
+				}
+			}
+		sampleIdx++;
+		} //endif(acquire)
+}
+
 
 
 
@@ -200,12 +392,21 @@ void Power::update(int _instVal1, int _instVal2) {
 
 void Average::publish() {
 	average = sumInstVal * scaling;
+	acqRdy=false;
 }
 
 
 void Rms::publish() {
 	msVal = sumSqInstVal * scalingSq;
 	rmsVal = sqrt(msVal);
+	acqRdy=false;
+}
+
+
+void Rms2::publish() {
+	msVal = sumSqInstVal * scalingSq;
+	rmsVal = sqrt(msVal);
+	acqRdy=false;
 }
 
 
@@ -216,7 +417,20 @@ void Power::publish() {
 	rmsVal2 = sqrt(msVal2);
 	apparentPwr = rmsVal1 * rmsVal2;
 	realPwr = sumInstPwr * scaling3;
-	PF = realPwr / apparentPwr;
+	pf = realPwr / apparentPwr;
+	acqRdy=false;
 }
 
-//end TrueRMS.cpp
+
+void Power2::publish() {
+	msVal1 = sumSqInstVal1 * scalingSq1;
+	rmsVal1 = sqrt(msVal1);
+	msVal2 = sumSqInstVal2 * scalingSq2;
+	rmsVal2 = sqrt(msVal2);
+	apparentPwr = rmsVal1 * rmsVal2;
+	realPwr = sumInstPwr * scaling3;
+	pf = realPwr / apparentPwr;
+	acqRdy=false;
+}
+
+//end of TrueRMS.cpp

@@ -2,8 +2,8 @@
  *
  * File: Measure_rms.ino
  * Purpose: TrueRMS library example project
- * Version: 1.0.0
- * Date: 07-11-2018
+ * Version: 1.0.1
+ * Date: 22-03-2019
  * URL: https://github.com/MartinStokroos/TrueRMS
  * License: MIT License
  *
@@ -38,7 +38,7 @@ void setup() {
   // run once:
   Serial.begin(115200);
   
-  readRms.begin(VoltRange, RMS_WINDOW, ADC_10BIT, BLR_ON, CNT_SCAN);
+  readRms.begin(VoltRange, RMS_WINDOW, ADC_10BIT, BLR_ON, CNTS);
   //readRms.begin(VoltRange, RMS_WINDOW, ADC_10BIT, BL_REST_OFF, SGL_SCAN);
   readRms.start();
   

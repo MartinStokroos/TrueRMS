@@ -2,8 +2,8 @@
 *
 * File: TrueRMS.h
 * Purpose: Average-, RMS- and AC-power measurement library
-* Version: 1.1.0
-* Date: 19-12-2018
+* Version: 1.2.0
+* Date: 23-05-2018
 * Release Date: 07-11-2018
 *
 *
@@ -37,8 +37,8 @@
 #define BLR_ON 1 // for baseline restore option switch
 #define BLR_OFF 0
 
-#define SGLS 1 // single scan mode
-#define CNTS 0 // continuous scanning mode
+#define SGL_SCAN 1 // single scan mode
+#define CNT_SCAN 0 // continuous scanning mode
 
 
 class Average
@@ -49,7 +49,7 @@ public:
 	void stop(void);
 	void update(int _instVal);
 	void publish(void);
-	int instVal; // volatile? update() could be called from ISR, but is never updated on other places...
+	int instVal; // volatile? update() can be called from ISR, but is never updated at any other place.
 	float average;
 	bool acquire;
 	bool acqRdy;

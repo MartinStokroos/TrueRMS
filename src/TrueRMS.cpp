@@ -2,8 +2,8 @@
 *
 * File: TrueRMS.cpp
 * Purpose: Average-, RMS- and AC-power measurement library
-* Version: 1.1.0
-* Date: 22-03-2019
+* Version: 1.2.0
+* Date: 23-05-2019
 * Release Date: 07-11-2018
 * URL: https://github.com/MartinStokroos/TrueRMS
 * License: MIT License
@@ -27,18 +27,21 @@
 * - Introduced a software flag to indicate the completion of a single scan acquisition run. This flag is cleared after calling
 * publish().
 *
-* - Introduced the Rms2 and Power2 classes. These version 2 classes have a better performance when used in an interrupt service 
-* routine, by spreading out the processing burden over the different sample time slots in the RMS window. Rms2 occupies one 
+* - Introduced the Rms2 and Power2 classes. Rms2 and Power2 perform better when used in an interrupt service routine by 
+* spreading out the processing burden over the different sample time slots within the RMS window. Rms2 occupies one 
 * extra sample time slot (window length+1) for doing the baseline restoration calculation (when BLR is on).
 *
 * - The method update() of the Power2 class has been split up in: update1() and update2(). update1() is called first and 
-* processes the first sample (for example, a sample of the input voltage) and power2() processes the second sample (a sample
+* processes the first sample (for example, a sample of the input voltage) and update2() processes the second sample (a sample
 * of the input current, or vice versa). Sampling voltage and current usually happens sequentially in a multiplexed ADC.
 * Furthermore, an extra sample time slot (window length+1) is occupied by the baseline restoration calculation (when BLR is on).
 *
 * - When BLR is on, instVal now returns the baseline restored sample value.
 *
 * - The power factor variable is: pf (lowercase letters)
+*
+* Changes compared to version 1.1.0:
+* - Name of constants SGLS and CNTS renamed into SGL_SCAN and CNT_SCAN.
 */
 
 #include "TrueRMS.h"
@@ -182,7 +185,7 @@ void Average::update(int _instVal) {
 			sumInstVal = temp_sumInstVal;
 			temp_sumInstVal=0;
 			sampleIdx=0;
-			if(mode == SGLS) { //update status bits
+			if(mode == SGL_SCAN) { //update status bits
 				acquire=false;
 				acqRdy=true;
 			}
@@ -209,7 +212,7 @@ void Rms::update(int _instVal) {
 				error = (int)round(sumInstVal / rmsWindow); // calculate error of DC-bias
 				dcBias = dcBias + error; // restore baseline
 				temp_sumInstVal=0;
-				if(mode == SGLS) { //update status bits
+				if(mode == SGL_SCAN) { //update status bits
 					acquire=false;
 					acqRdy=true;
 				}
@@ -240,7 +243,7 @@ void Rms2::update(int _instVal) {
 				temp_sumInstVal=0;
 				temp_sumSqInstVal=0;
 				sampleIdx=0;
-				if(mode == SGLS) { //update status bits
+				if(mode == SGL_SCAN) { //update status bits
 					acquire=false;
 					acqRdy=true;
 				}
@@ -253,7 +256,7 @@ void Rms2::update(int _instVal) {
 				sumSqInstVal=temp_sumSqInstVal;
 				temp_sumSqInstVal=0;
 				sampleIdx=0;
-				if(mode == SGLS) { //update status bits
+				if(mode == SGL_SCAN) { //update status bits
 					acquire=false;
 					acqRdy=true;
 				}
@@ -297,7 +300,7 @@ void Power::update(int _instVal1, int _instVal2) {
 			temp_sumSqInstVal2=0;
 			temp_sumInstPwr=0;
 			sampleIdx=0;
-			if(mode == SGLS) { //update status bits
+			if(mode == SGL_SCAN) { //update status bits
 				acquire=false;
 				acqRdy=true;
 			}
@@ -359,7 +362,7 @@ void Power2::update2(int _instVal) {
 					temp_sumSqInstVal2=0;
 					temp_sumInstPwr=0;
 					sampleIdx=0;
-					if(mode == SGLS) { //update status bits
+					if(mode == SGL_SCAN) { //update status bits
 						acquire=false;
 						acqRdy=true;
 					}
@@ -376,7 +379,7 @@ void Power2::update2(int _instVal) {
 					temp_sumSqInstVal2=0;
 					temp_sumInstPwr=0;
 					sampleIdx=0;
-					if(mode == SGLS) { //update status bits
+					if(mode == SGL_SCAN) { //update status bits
 						acquire=false;
 						acqRdy=true;
 					}

@@ -230,7 +230,7 @@ The rms window is 40 samples, which means that the window covers two 50Hz cycles
 The ADC bit resolution is 10bit (Arduino UNO).
 
 BLR_ON means that the baseline restoration is switched on. To capture an AC-signal with the ADC, the zero value of the signal must be shifted towards the mid point of the ADC-range by adding a DC-offset voltage with the ADC input circuitry. This offset must be corrected afterwards in software by subtracting a constant value from the acquired ADC value. This correction can be done automatically with BLR_ON and calibration is not needed.
-In figure 1, the blue line indicates the maximum scaled input signal with a voltage swing of 5V and biased on 2.5V. The green line shows an input signal with an amplitude of 1V and this will measure 1V/sqrt(2) = 0.71Vrms.
+In figure 1, the blue line indicates the maximum scaled input signal with a voltage swing of 5V and biased on 2.5V. The green line shows an input signal with an amplitude of 1V and measures 1V/sqrt(2) = 0.71Vrms.
 
 ![Figure 1](figures/figure1.png)
 

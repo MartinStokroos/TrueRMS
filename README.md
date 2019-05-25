@@ -56,12 +56,16 @@ This method stops the acquisition.
 Assign the current sample value.
 #
 `void publish(void);`
-Publish the result(s) from the last completed acquisition run. The results are in the output variable(s) as defined above.
+Publish the result(s) from the last completed acquisition run. The results are in the output variable(s) as defined next.
 #
 The public defined variables are:
+
 `int instVal` - the value of the last acquired sample
+
 `float average` - the average value result
+
 `bool acquire` -  status bit, TRUE when scan is pending.
+
 ***
 
 ### Rms or Rms2
@@ -87,14 +91,17 @@ This method stops the acquisition.
 Assign the current sample value.
 #
 `void publish(void);`
-Publish the result(s) from the last completed acquisition run. The results are in the output variable(s) as defined above.
+Publish the result(s) from the last completed acquisition run. The results are in the output variable(s) as defined next.
 #
 The public defined variables are:
 
-`int instVal` - the value of the last acquired sample, restored to the baseline when BLR_ON.
+`int instVal` - the value of the last acquired sample, restored to the baseline when BLR_ON
+
 `float rmsVal` - the rms value result
+
 `int dcBias` - the dcBias value in ADC-units. Only relevant when BLR_ON
-`bool acquire` - status bit, TRUE if scan is pending.
+
+`bool acquire` - status bit, TRUE if scan is pending
 
 ***
 
@@ -121,19 +128,28 @@ This method stops the acquisition.
 Assign the current sample values (for example voltage and current) at once.
 #
 `void publish(void);`
-Publish the result(s) from the last completed acquisition run. The results are in the output variable(s) as defined above.
+Publish the result(s) from the last completed acquisition run. The results are in the output variable(s) as defined next.
 #
 The public defined variables are:
 
-`int instVal1` - the value of the last acquired sample (voltage), restored to the baseline when BLR_ON.
-`int instVal2` - the value of the last acquired sample (current), restored to the baseline when BLR_ON.
+`int instVal1` - the value of the last acquired sample (voltage), restored to the baseline when BLR_ON
+
+`int instVal2` - the value of the last acquired sample (current), restored to the baseline when BLR_ON
+
 `float rmsVal1` - RMS value1 (voltage)
+
 `float rmsVal2` - RMS value2 (current)
+
 `int dcBias1` - the dcBias1 value in ADC-units. Only relevant when BLR_ON
+
 `int dcBias2` - the dcBias2 value in ADC-units. Only relevant when BLR_ON
+
 `float apparentPwr` - the apparent power
+
 `float realPwr` - real power
+
 `float pf` - power factor
+
 `bool acquire` - status bit, TRUE if scan is pending
 
 ***
@@ -166,19 +182,28 @@ Call `update1()` and `update2()` alternately in the sampling loop.
 #
 `void publish(void);`
 Publish the result(s) from the last completed acquisition run.
-The results are available from the output variable(s) as defined above.
+The results are available from the output variable(s) as defined next.
 #
 The public defined variables are:
 
-`int instVal1` - the value of the last acquired sample (voltage), restored to the baseline when BLR_ON.
-`int instVal2` - the value of the last acquired sample (current), restored to the baseline when BLR_ON.
+`int instVal1` - the value of the last acquired sample (voltage), restored to the baseline when BLR_ON
+
+`int instVal2` - the value of the last acquired sample (current), restored to the baseline when BLR_ON
+
 `float rmsVal1` - RMS value1 (voltage)
+
 `float rmsVal2` - RMS value2 (current)
+
 `int dcBias1` - the dcBias1 value in ADC-units. Only relevant when BLR_ON
+
 `int dcBias2` - the dcBias2 value in ADC-units. Only relevant when BLR_ON
+
 `float apparentPwr`, the apparent power
+
 `float realPwr` - real power
+
 `float pf` - power factor
+
 `bool acquire` - status bit, TRUE if scan is pending
 
 ***

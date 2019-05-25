@@ -12,7 +12,7 @@ The following library classes are implemented:
 * `Power2`
 
 *Average* calculates the average value from a number of input samples (usually) from the ADC. *Rms* or *Rms2* is meant to calculate the root-mean-square value of a signal and *Power* or *Power2* is meant to calculate the power from both voltage and current input.
-Rms2 and Power2 perform better when used in an interrupt service routine by spreading out the processing burden over the sample time slots. The number of samples for one acquisition run (scan) is defined as the size of the *window*. Rms2 and Power2 occupy one extra sample time slot (window+1), when the automatic baseline restoration option is on (BLR_ON).
+*Rms2* and *Power2* perform better when used in an interrupt service routine by better spreading out the processing burden over the sample time slots. The number of samples for one acquisition run (scan) is defined as the *window*. *Rms2* and *Power2* occupy one extra sample time slot (window+1) if the automatic baseline restoration option is on (BLR_ON).
 
 The following methods exist:
 

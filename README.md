@@ -34,7 +34,7 @@ For the `Power2` class update() is broken down into `update1()` and `update2()`.
 
 ***
 
-####Average
+### Average
 For the class *Average*, use:
 
 `void begin(float range, unsigned char window, unsigned char nob, bool mode);`
@@ -64,7 +64,7 @@ The public defined variables are:
 `bool acquire` -  status bit, TRUE when scan is pending.
 ***
 
-####Rms or Rms2
+### Rms or Rms2
 For the class *Rms* or *Rms2*, use:
 
 `void begin(float range, unsigned char window, unsigned char nob, bool blr, bool mode);`
@@ -98,7 +98,7 @@ The public defined variables are:
 
 ***
 
-####Power
+### Power
 For the class *Power* use:
 
 `void begin(float range1, float range2, unsigned char window, unsigned char nob, bool blr, bool mode);`
@@ -138,7 +138,7 @@ The public defined variables are:
 
 ***
 
-####Power2
+### Power2
 For the class *Power2* use:
 
 `void begin(float range1, float range2, unsigned char window, unsigned char nob, bool blr, bool mode);`

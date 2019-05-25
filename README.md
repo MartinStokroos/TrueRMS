@@ -1,5 +1,5 @@
 # True RMS Library for Arduino
-This repository contains the *TrueRMS* C++ library for Arduino. With this library it is possible to calculate the average value and the *rms* (root mean square) or *effective* value of a signal. With this library it is also possible to calculate the (vector)power from both, voltage and current signals. The voltage and the voltage representation of a current, can be measured with the ADC of the Arduino by using appropriate input circuitry for scaling the measured quantities down to within the 0-5V range to be compliant with the Arduino ADC inputs.
+This repository contains the *TrueRMS* C++ library for Arduino. With this library it is possible to calculate the *average* value and the *rms* (root mean square) or *effective* value of a signal. With this library it is also possible to calculate the *(vector)power*, from both, voltage and current signals. The voltage and the voltage representation of a current, can be measured with the ADC of the Arduino by using appropriate input circuitry for scaling the measured quantities down to within the 0-5V compliant ADC input voltage range.
 The provided solution uses a simple method for scaling the units. The user only has to define the full scale peak-to-peak value of the ac input signal(s). This library is easy portable to other platforms.
 
 ## Function
@@ -11,22 +11,30 @@ The following library classes are implemented:
 * `Power`
 * `Power2`
 
-*Average* calculates the average value from a number of input samples (usually) from the ADC, *Rms* or *Rms2* can be used to calculate the root-mean-square value of a signal and *Power* or *Power2* to calculate the power from voltage and current input.
+*Average* calculates the average value from a number of input samples (usually) from the ADC. *Rms* or *Rms2* is meant to calculate the root-mean-square value of a signal and *Power* or *Power2* is meant to calculate the power from both voltage and current input.
+Rms2 and Power2 perform better when used in an interrupt service routine by spreading out the processing burden over the sample time slots. The number of samples for one acquisition run (scan) is defined as the size of the *window*. Rms2 and Power2 occupy one extra sample time slot (window+1), when the automatic baseline restoration option is on (BLR_ON).
 
 The following methods exist:
 
-`begin()`
+* `begin()`
+* `start()`
+* `stop()`
+* `update()`
+* `update1()`
+* `update2()`
+* `publish()`
 
-`start()`
+For the `Power2` class update() is broken down into `update1()` and `update2()`. `update1()` must be called first to process the current sample for the input voltage and `update2()` to process the current sample for the input current or vica versa. Sampling voltage and current usually happens sequentially in a multiplexed ADC and not simultaneously.
 
-`stop()`
+## Usage
+1. Initialize an instance of a class as defined above with the member function `begin()`. This method is for initializing and it needs input to set the scaling of the measurement units, the size of the sampling window, the number of bits of the used ADC (or input signal) and the acquisition mode (continuous scan/single scan).
+2. call `start()` to start the acquisition.
+3. call `update()` (`update1()` or `update2()` in case of `Power2`) repeatedly at a constant rate.
+4. call `publish()` to obtain the results.
 
-`update()` and `update1()`,+`update2()` for the `Power2` class.
+***
 
-`publish()`
-
-First initialize an instance from a class defined above with the member function `begin()`. This method is to initialize the class and it needs values to set the scaling, the size of the sampling window, the number of bits of the input signal and the acquisition mode (continuous/single).
-
+####Average
 For the class *Average*, use:
 
 `void begin(float range, unsigned char window, unsigned char nob, bool mode);`
@@ -34,107 +42,148 @@ For the class *Average*, use:
 With:
 
 - `range` is the maximum expected full swing of the ac input signal (peak-to-peak value).
-
-- `window` the length of the sample window, expressed in number of samples.
-
-- `nob` is the bit resolution of the input signal (ADC bit depth). Use the predefined constants: `ADC_8BIT`, `ADC_10BIT`, `ADC_12BIT`.
-
-- `mode` sets the mode in continuous scan or single scan. Use the predefined constants: `CNTS` or `SGLS`.
-
-
+- `window` the length of the sample window, expressed in a whole number of samples.
+- `nob` is the bit resolution of the input signal (ADC bit depth). Use the predefined constants: `ADC_8BIT`, `ADC_10BIT` or `ADC_12BIT`.
+- `mode` sets the mode to continuous scan or single scan. Use the predifined constants `CNT_SCAN` or `SGL_SCAN`.
+#
+`void start(void);`
+This method starts the acquisition for continuous scan and single scan mode.
+#
+`void stop(void);`
+This method stops the acquisition.
+#
+`void update(int instVal);`
+Assign the current sample value.
+#
+`void publish(void);`
+Publish the result(s) from the last completed acquisition run. The results are in the output variable(s) as defined above.
+#
 The public defined variables are:
+`int instVal` - the value of the last acquired sample
+`float average` - the average value result
+`bool acquire` -  status bit, TRUE when scan is pending.
+***
 
-`int instVal`, the value of the current acquired sample,
-
-`float average`, the average value result,
-
-`bool acquire` status bit, TRUE if scan is pending.
-
-
-For the class *Rms*, use:
+####Rms or Rms2
+For the class *Rms* or *Rms2*, use:
 
 `void begin(float range, unsigned char window, unsigned char nob, bool blr, bool mode);`
 
 With:
 
 - `range` is the maximum expected full swing of the ac-signal (peak-to-peak value).
-
-- `window` the length of the sample window expressed in number of samples.
-
+- `window` the length of the sample window expressed in a whole number of samples.
 - `nob` is the bit resolution of the input signal, usually this is the ADC bit depth. Use the predefined constants: `ADC_8BIT`, `ADC_10BIT` or `ADC_12BIT`.
-
-- `blr` sets the automatically baseline restoration function on or off. Use the predifined constants: `BLR_ON` or `BLR_OFF`.
-
-- `mode` sets the mode in continuous scan / single scan. Use predifined constants: `CNTS` or `SGLS`.
-
-
+- `blr` sets the automatically baseline restoration function on or off. Use the predifined constants `BLR_ON` or `BLR_OFF`.
+- `mode` sets the mode to continuous scan or single scan. Use the predifined constants `CNT_SCAN` or `SGL_SCAN`.
+#
+`void start(void);`
+This method starts the acquisition for continuous scan and single scan mode.
+#
+`void stop(void);`
+This method stops the acquisition.
+#
+`void update(int instVal);`
+Assign the current sample value.
+#
+`void publish(void);`
+Publish the result(s) from the last completed acquisition run. The results are in the output variable(s) as defined above.
+#
 The public defined variables are:
 
-`int instVal`, the value of the current acquired sample,
+`int instVal` - the value of the last acquired sample, restored to the baseline when BLR_ON.
+`float rmsVal` - the rms value result
+`int dcBias` - the dcBias value in ADC-units. Only relevant when BLR_ON
+`bool acquire` - status bit, TRUE if scan is pending.
 
-`float rmsVal`, the rms value result,
+***
 
-`int dcBias`, the dcBias value in ADC-units, only relevant when BLR_ON,
-
-`bool acquire` status bit, TRUE if scan is pending.
-
-
-For the class *Power*, use:
+####Power
+For the class *Power* use:
 
 `void begin(float range1, float range2, unsigned char window, unsigned char nob, bool blr, bool mode);`
 
 With:
 
 - `range1, range2` is the maximum expected full swing of the ac-signals (peak-to-peak value) of the voltage and current.
-
-- `window` the length of the sample window expressed in number of samples.
-
+- `window` the length of the sample window expressed in a whole number of samples.
 - `nob` is the bit resolution of the input signal, usually this is the ADC bit depth. Use the predifined constants: `ADC_8BIT`, `ADC_10BIT` or `ADC_12BIT`.
-
-- `blr` sets the automatically baseline restoration function on or off. Use the predifined constants: `BLR_ON` or `BLR_OFF`.
-
-- `mode` sets the mode in continuous scan / single scan. `CNTS` or `SGLS`.
-
-
+- `blr` sets the automatically baseline restoration function on or off. Use the predifined constants `BLR_ON` or `BLR_OFF`.
+- `mode` sets the mode to continuous scan or single scan. Use the predifined constants `CNT_SCAN` or `SGL_SCAN`.
+#
+`void start(void);`
+This method starts the acquisition for continuous scan and single scan mode.
+#
+`void stop(void);`
+This method stops the acquisition.
+#
+`void update(int instVal1, int instVal2);`
+Assign the current sample values (for example voltage and current) at once.
+#
+`void publish(void);`
+Publish the result(s) from the last completed acquisition run. The results are in the output variable(s) as defined above.
+#
 The public defined variables are:
 
-`int instVal1`, the value of the current acquired sample of the voltage,
+`int instVal1` - the value of the last acquired sample (voltage), restored to the baseline when BLR_ON.
+`int instVal2` - the value of the last acquired sample (current), restored to the baseline when BLR_ON.
+`float rmsVal1` - RMS value1 (voltage)
+`float rmsVal2` - RMS value2 (current)
+`int dcBias1` - the dcBias1 value in ADC-units. Only relevant when BLR_ON
+`int dcBias2` - the dcBias2 value in ADC-units. Only relevant when BLR_ON
+`float apparentPwr` - the apparent power
+`float realPwr` - real power
+`float pf` - power factor
+`bool acquire` - status bit, TRUE if scan is pending
 
-`int instVal2`, the value of the current acquired sample of the current,
+***
 
-`float rmsVal1`, RMS value1 (voltage)
+####Power2
+For the class *Power2* use:
 
-`float rmsVal2`, RMS value2 (current)
+`void begin(float range1, float range2, unsigned char window, unsigned char nob, bool blr, bool mode);`
 
-`int dcBias1`, the dcBias1 value in ADC-units, only relevant when BLR_ON,
+With:
 
-`int dcBias2`, the dcBias2 value in ADC-units, only relevant when BLR_ON,
-
-`float apparentPwr`, the apparent power,
-
-`float realPwr`, real power,
-
-`float PF`, power factor,
-
-`bool acquire`, status bit, TRUE if scan is pending.
-
-
-<u>Common Methods</u>
-
-This method starts the acquisition for both, the continuous scan and for single scan:
+- `range1, range2` is the maximum expected full swing of the ac-signals (peak-to-peak value) of the voltage and current.
+- `window` the length of the sample window expressed in a whole number of samples.
+- `nob` is the bit resolution of the input signal, usually this is the ADC bit depth. Use the predifined constants: `ADC_8BIT`, `ADC_10BIT` or `ADC_12BIT`.
+- `blr` sets the automatically baseline restoration function on or off. Use the predifined constants `BLR_ON` or `BLR_OFF`.
+- `mode` sets the mode to continuous scan or single scan. Use the predifined constants `CNT_SCAN` or `SGL_SCAN`.
+#
 `void start(void);`
-
-This method stops the acquisition:
+This method starts the acquisition for continuous scan and single scan mode.
+#
 `void stop(void);`
-
-`update()` must be called on basis of a regular time interval to obtain accurate readings. The loop iteration time defines the sample rate. `Value` is the (instantaneous) sample value:
-
-`void update(int Value);`
-
-Publish calculates the output value(s) from the last acquisition run:
+This method stops the acquisition.
+#
+`void update1(int instVal);`
+Assign the current sample value for example for the voltage.
+#
+`void update2(int instVal);`
+Assign the current sample value for example for the current.
+Call `update1()` and `update2()` alternately in the sampling loop.
+#
 `void publish(void);`
+Publish the result(s) from the last completed acquisition run.
+The results are available from the output variable(s) as defined above.
+#
+The public defined variables are:
 
-## Usage
+`int instVal1` - the value of the last acquired sample (voltage), restored to the baseline when BLR_ON.
+`int instVal2` - the value of the last acquired sample (current), restored to the baseline when BLR_ON.
+`float rmsVal1` - RMS value1 (voltage)
+`float rmsVal2` - RMS value2 (current)
+`int dcBias1` - the dcBias1 value in ADC-units. Only relevant when BLR_ON
+`int dcBias2` - the dcBias2 value in ADC-units. Only relevant when BLR_ON
+`float apparentPwr`, the apparent power
+`float realPwr` - real power
+`float pf` - power factor
+`bool acquire` - status bit, TRUE if scan is pending
+
+***
+
+## Example
 * First create an instance of the library object, for example we define *gridVolt*:
 ```
 Rms gridVolt;
@@ -143,57 +192,64 @@ Rms gridVolt;
 ```
 void setup() {
 	...
-	gridVolt.begin(700, 40, ADC_10BIT, BLR_ON, CNTS);`
+	gridVolt.begin(700, 40, ADC_10BIT, BLR_ON, CNT_SCAN);`
 	...
 }
 ```
 The arguments mean:
 
-The full ADC range (0 to 5Volts) represents a signal peak-to-peak value of 700V. This equals a voltage amplitude of 350V or 247.5Vrms for a sine wave.
+The full ADC range (0 to 5Volts) represents a signal peak-to-peak value of 700V. This equals a signal amplitude of 350V or 247.5Vrms for a sine-wave.
 
-The rms window is 40 samples, which means that the window covers two 50Hz cycles, when sampling at a rate of 1000 samples/sec.
+The rms window is 40 samples, which means that the window covers two 50Hz cycles, when the sampling rate was chosen at 1000 samples/sec.
 
 The ADC bit resolution is 10bit (Arduino UNO).
 
-BLR_ON means that the baseline restoration is switched on. To capture an AC-signal with the ADC, the zero value of the signal must be shifted towards the mid point of the ADC range by adding a DC-offset voltage with the ADC input circuitry. This offset must be corrected afterwards in software by subtracting a constant value from the ADC value. This correction can be done automatically with BLR_ON and calibration is not needed.
-In figure 1, the blue line indicates the maximum scaled input signal with a voltage swing of 5V and biased on 2.5V. The green line shows an input signal with an amplitude of 1V and this will measure 1V/sqrt(2) = 0.71Vrms. 
-
-With the option CNTS, the acquisition is set into the continous mode. The acquisition will restart automatically after the last sampling scan.
+BLR_ON means that the baseline restoration is switched on. To capture an AC-signal with the ADC, the zero value of the signal must be shifted towards the mid point of the ADC-range by adding a DC-offset voltage with the ADC input circuitry. This offset must be corrected afterwards in software by subtracting a constant value from the acquired ADC value. This correction can be done automatically with BLR_ON and calibration is not needed.
+In figure 1, the blue line indicates the maximum scaled input signal with a voltage swing of 5V and biased on 2.5V. The green line shows an input signal with an amplitude of 1V and this will measure 1V/sqrt(2) = 0.71Vrms.
 
 ![Figure 1](figures/figure1.png)
 
- * Call `gridVolt.update(int adcVal);` from the main loop or from an Interrupt Service Routine (ISR). Make sure that the loop iterates with 1000Hz.
+With the option CNT_SCAN, the acquisition is set in the continous mode. The acquisition will restart automatically after completing the last scan.
+
+ * Call `gridVolt.update(adcVal);` from the main loop or from an Interrupt Service Routine (ISR). Make sure that the loop repeats at a constant rate.
  
- * Calculate the results with `gridVolt.publish()` and obtain the rms value with: `float Voltage = gridVolt.rmsVal;`
+ * Get the results with `gridVolt.publish()` and obtain the rms value: `float Voltage = gridVolt.rmsVal;`
  
 ``` 
 void loop() { // loop must run at 1kHz
 	...
+	adcValue = analogRead(AN0); // read the ADC.
 	gridVolt.update(adcValue);
 	
 	counter++;
 	if(counter >= 500) { // publish every 0.5s
+	gridVolt.publish();
 	Voltage = gridVolt.rmsVal;
 	counter = 0;
 	}
 	...
 	while(loop_timer_not_expired) {1}
+	...
 }
 ```
 
-## Examples
-`Measure_avg.ino` - This example shows how to calculate the average value of a signal measured with the ADC. It can be used for example when measuring noisy DC voltages.
+## Example Arduino Sketches
+`Measure_avg.ino` - This example shows how to calculate the average value of a signal measured with the ADC.
 
 `Measure_rms.ino` -  With this example, the RMS-value of the ADC input voltage is determined. 
 
-`AC_powermeter.ino` - This is a complete AC-power measurement application. It needs voltage and a voltage representation of the current as input. It determines the apparent power, real power, power factor and the rms-values of the voltage and current.
+`AC_powermeter.ino` - This is an example for a complete AC-power measurement application. It needs voltage and a voltage representation of the current as input on two ADC-channels. It determines the apparent power, real power, power factor and the rms-values of the voltage and current.
 
-## AC measurements with the Arduino
+## AC-line measurements with the Arduino
 The simplest way to interface AC high voltages with the Arduino ADC is by using a voltage transducer, for example the *LV 25-P* voltage transducer from *LEM USA Inc.* This transducer provides galvanic isolation, scaling and level shifting in a single package. For current sensing, *LEM* also manufactures the *LEM_LA55-P*, with the same advantages as for the voltage transducer.
 
-If one prefers to build input scaling circuits from discrete components, a detailed design description is given in the application note [tiduay6c.pdf](http://www.ti.com/lit/ug/tiduay6c/tiduay6c.pdf) belonging to the Voltage Source Inverter Reference Design from Texas Instruments Incorporated. Take notice to the warnings! The proposed circuits can easily be adapted to the 0-5V range for the Arduino.
+If one prefers to build input scaling circuits from discrete components, a detailed design description is given in the application note [tiduay6c.pdf](http://www.ti.com/lit/ug/tiduay6c/tiduay6c.pdf) that belongs to the Voltage Source Inverter Reference Design from Texas Instruments Incorporated. Take notice of the warnings! The proposed circuits can easily be adapted to the 0-5V range for the Arduino.
 
 At all times, USE AN ISOLATION TRANSFORMER FOR SAFETY!
 
+## Future Developments
+Energy metering.
+
 ## Acknowledgement
-A lot of time was saved in developing this library by using the alternative Arduino-IDE *Sloeber*. Sloeber is a wonderful Arduino plugin for Eclipse. Thanks to Jantje and his contributors! 
+A lot of time was saved in developing this library by using the alternative Arduino-IDE [Sloeber](https://eclipse.baeyens.it/). Sloeber is a wonderful Arduino plugin for Eclipse. Thanks to Jantje and his contributors!
+

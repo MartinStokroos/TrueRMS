@@ -24,7 +24,7 @@ The following methods exist:
 * `update2()`
 * `publish()`
 
-For the `Power2` class update() is broken down into `update1()` and `update2()`. `update1()` must be called first to process the current sample for the input voltage and `update2()` to process the current sample for the input current or vica versa. Sampling voltage and current usually happens sequentially in a multiplexed ADC and not simultaneously.
+For the `Power2` class update() is broken down into `update1()` and `update2()`. `update1()` must be called first to process the sample from the input voltage and `update2()` to process the sample from the input current or vica versa(voltage-current). Sampling voltage and current usually happens sequentially in a multiplexed ADC and not simultaneously.
 
 ## Usage
 1. Initialize an instance of a class as defined above with the member function `begin()`. This method is for initializing and it needs input to set the scaling of the measurement units, the size of the sampling window, the number of bits of the used ADC (or input signal) and the acquisition mode (continuous scan/single scan).

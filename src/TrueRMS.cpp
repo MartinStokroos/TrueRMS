@@ -1,9 +1,9 @@
 /*
 *
 * File: TrueRMS.cpp
-* Purpose: Average-, RMS- and AC-power measurement library
-* Version: 1.2.0
-* Date: 23-05-2019
+* Purpose: Average, RMS, AC-power and Energy measurement library.
+* Version: 1.3.0
+* File Date: 13-10-2019
 * Release Date: 07-11-2018
 * URL: https://github.com/MartinStokroos/TrueRMS
 * License: MIT License
@@ -22,6 +22,15 @@
 * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
+*/
+
+
+/*
+* Changes compared to version 1.2.0:
+* - Added energy meetering to publish function of class Power and Power2.
+*
+* Changes compared to version 1.1.0:
+* - Name of constants SGLS and CNTS renamed into SGL_SCAN and CNT_SCAN.
 *
 * Changes compared to version 1.0.0:
 * - Introduced a software flag to indicate the completion of a single scan acquisition run. This flag is cleared after calling
@@ -40,8 +49,6 @@
 *
 * - The power factor variable is: pf (lowercase letters)
 *
-* Changes compared to version 1.1.0:
-* - Name of constants SGLS and CNTS renamed into SGL_SCAN and CNT_SCAN.
 */
 
 #include "TrueRMS.h"
@@ -391,11 +398,7 @@ void Power2::update2(int _instVal) {
 
 
 
-
-
-
 //*********** Publishing ***********//
-
 void Average::publish() {
 	average = sumInstVal * scaling;
 	acqRdy=false;
@@ -424,6 +427,11 @@ void Power::publish() {
 	apparentPwr = rmsVal1 * rmsVal2;
 	realPwr = sumInstPwr * scaling3;
 	pf = realPwr / apparentPwr;
+	newTime = millis();
+	deltaT = newTime - oldTime;
+	oldTime = newTime;
+	eAcc += sumInstPwr * deltaT;	//energy accumulator
+	energy = eAcc * scaling3 / 3.6e6; //output in Wh
 	acqRdy=false;
 }
 
@@ -436,7 +444,11 @@ void Power2::publish() {
 	apparentPwr = rmsVal1 * rmsVal2;
 	realPwr = sumInstPwr * scaling3;
 	pf = realPwr / apparentPwr;
+	newTime = millis();
+	deltaT = newTime - oldTime;
+	oldTime = newTime;
+	eAcc += sumInstPwr * deltaT;	//energy accumulator
+	energy = eAcc * scaling3 / 3.6e6; //output in Wh
 	acqRdy=false;
 }
-
 //end of TrueRMS.cpp

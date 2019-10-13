@@ -1,9 +1,9 @@
 /*
 *
 * File: TrueRMS.h
-* Purpose: Average-, RMS- and AC-power measurement library
-* Version: 1.2.0
-* Date: 23-05-2018
+* Purpose: Average, RMS, AC-power and Energy measurement library.
+* Version: 1.3.0
+* File date: 13-10-2018
 * Release Date: 07-11-2018
 *
 *
@@ -143,6 +143,7 @@ public:
 	float apparentPwr;
 	float realPwr;
 	float pf;
+	float energy;
 	bool acquire;
 	bool acqRdy;
 private:
@@ -170,6 +171,10 @@ private:
 	float sumSqInstVal2;
 	float temp_sumInstPwr;
 	float sumInstPwr;
+	unsigned long newTime;
+	unsigned long oldTime;
+	unsigned int deltaT;
+	float eAcc;
 };
 
 
@@ -192,6 +197,7 @@ public:
 	float apparentPwr;
 	float realPwr;
 	float pf;
+	float energy;
 	bool acquire;
 	bool acqRdy;
 private:
@@ -219,6 +225,10 @@ private:
 	float sumSqInstVal2;
 	float temp_sumInstPwr;
 	float sumInstPwr;
+	unsigned long newTime;
+	unsigned long oldTime;
+	unsigned int deltaT;
+	float eAcc;
 };
 
 #endif /* TrueRMS_H_ */

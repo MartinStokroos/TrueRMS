@@ -63,13 +63,13 @@ void loop() {
 	cnt++;
 	if(cnt >= 500) { // publish every sec
 		acPower.publish();
-		Serial.print(acPower.rmsVal1, 1);
+		Serial.print(acPower.rmsVal1, 1); // V
 		Serial.print(", ");
-		Serial.print(acPower.rmsVal2, 1);
+		Serial.print(acPower.rmsVal2, 1); // A
 		Serial.print(", ");
-		Serial.print(acPower.realPwr, 1);
+		Serial.print(acPower.realPwr, 1); // P
 		Serial.print(", ");
-		Serial.println(acPower.energy);
+		Serial.println(acPower.energy/3600, 2); // Wh
 		cnt=0;
 	}
 

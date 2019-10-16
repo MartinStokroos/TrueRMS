@@ -1,7 +1,7 @@
 # True RMS Library for Arduino v1.3
 This repository contains the *TrueRMS* C++ library for Arduino. With this library it is possible to calculate the *average* value and the *rms* (root mean square) or *effective* value of the ADC input  signal. This library also calculates the *real-*, *apparent power* and the *power factor* from both, voltage and current input signals. From version 1.3, energy metering has been added to the project.
 
-The voltage and the voltage representation of a current can be measured with the ADC of the Arduino by using appropriate input circuitry for scaling the measured quantities down to within the 0-5V compliant voltage range of the ADC. The provided solution uses a simple method for scaling the measured quantities. The user only has to define the full scale peak-to-peak value of the AC input voltage and current. When the units of the measured quantities are defined in Volt and Ampere, then the calculated power is in Watt and the energy in Ws (Joules). This library is easy portable to other platforms.
+The voltage and the voltage representation of a current can be measured with the ADC of the Arduino by using appropriate input circuitry for scaling the measured quantities down to within the 0-5V compliant voltage range of the ADC. The provided solution uses a simple method for scaling the measured quantities. The user only has to define the full scale peak-to-peak value of the AC input voltage and current. When the units of the measured quantities are defined in Volts and Amperes, then the calculated power is in Watt and the energy in Ws (Joules). This library is easy portable to other platforms.
 
 ## Function
 The following library classes are implemented:
@@ -27,7 +27,7 @@ The following methods exist:
 * `publish()`
 
 ## Usage
-**For a quick start, see the example Arduino sketches below.**
+**For a quick start, check the example Arduino sketches that come with the library.**
 
 These are the steps to follow for a successful implementation:
 

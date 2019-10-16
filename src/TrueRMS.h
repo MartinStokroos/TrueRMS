@@ -1,7 +1,7 @@
 /*
 *
 * File: TrueRMS.h
-* Purpose: Average, RMS, AC-power and Energy measurement library.
+* Purpose: Average, RMS, Power and Energy measurement library.
 * Version: 1.3.0
 * File date: 13-10-2018
 * Release Date: 07-11-2018
@@ -23,7 +23,9 @@
 * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*
 */
+
 
 #ifndef TrueRMS_H_
 #define TrueRMS_H_
@@ -34,7 +36,7 @@
 #define ADC_10BIT 10
 #define ADC_12BIT 12
 
-#define BLR_ON 1 // for baseline restore option switch
+#define BLR_ON 1 // baseline restore switch option
 #define BLR_OFF 0
 
 #define SGL_SCAN 1 // single scan mode
@@ -49,7 +51,7 @@ public:
 	void stop(void);
 	void update(int _instVal);
 	void publish(void);
-	int instVal; // volatile? update() can be called from ISR, but is never updated at any other place.
+	int instVal;
 	float average;
 	bool acquire;
 	bool acqRdy;
@@ -57,8 +59,8 @@ private:
 	bool mode;
 	int avgWindow;
 	float scaling;
-	short sampleIdx; // volatile?
-	long temp_sumInstVal; // volatile?
+	short sampleIdx;
+	long temp_sumInstVal;
 	long sumInstVal;
 };
 
@@ -72,24 +74,24 @@ public:
 	void stop(void);
 	void update(int _instVal);
 	void publish(void);
-	int instVal; // volatile?
+	int instVal;
 	float rmsVal;
-	int dcBias; // volatile?
+	int dcBias;
 	bool acquire;
 	bool acqRdy;
 private:
-	bool blr; // baseline restore switch
+	bool blr; // baseline restoration switch
 	bool mode;
 	int rmsWindow;
 	float const alpha=0.7; // baseline restoration filter constant
-	int error;  // volatile?
-	short sampleIdx;  // volatile?
+	int error;
+	short sampleIdx;
 	float scaling;
 	float scalingSq;
 	float msVal;
 	float sumInstVal;
-	float temp_sumInstVal;  // volatile?
-	float temp_sumSqInstVal;  // volatile?
+	float temp_sumInstVal;
+	float temp_sumSqInstVal;
 	float sumSqInstVal;
 };
 
@@ -103,24 +105,24 @@ public:
 	void stop(void);
 	void update(int _instVal);
 	void publish(void);
-	int instVal; // volatile?
+	int instVal;
 	float rmsVal;
-	int dcBias; // volatile?
+	int dcBias;
 	bool acquire;
 	bool acqRdy;
 private:
-	bool blr; // baseline restore switch
+	bool blr;
 	bool mode;
 	int rmsWindow;
-	float const alpha=0.7; // baseline restoration filter constant
-	int error;  // volatile?
-	short sampleIdx;  // volatile?
+	float const alpha=0.7;
+	int error;
+	short sampleIdx;
 	float scaling;
 	float scalingSq;
 	float msVal;
 	float sumInstVal;
-	float temp_sumInstVal;  // volatile?
-	float temp_sumSqInstVal;  // volatile?
+	float temp_sumInstVal;
+	float temp_sumSqInstVal;
 	float sumSqInstVal;
 };
 
@@ -134,12 +136,12 @@ public:
 	void stop(void);
 	void update(int _instVal1, int _instVal2);
 	void publish(void);
-	float instVal1; // volatile?
-	float instVal2; // volatile?
+	float instVal1;
+	float instVal2;
 	float rmsVal1;
 	float rmsVal2;
-	int dcBias1; // volatile?
-	int dcBias2; // volatile?
+	int dcBias1;
+	int dcBias2;
 	float apparentPwr;
 	float realPwr;
 	float pf;
@@ -147,13 +149,13 @@ public:
 	bool acquire;
 	bool acqRdy;
 private:
-	bool blr; // baseline restore switch
+	bool blr;
 	bool mode;
 	int rmsWindow;
-	float const alpha=0.7; // baseline restoration filter constant
-	int error1; // volatile?
-	int error2; // volatile?
-	short sampleIdx; // volatile?
+	float const alpha=0.7;
+	int error1;
+	int error2;
+	short sampleIdx;
 	float scaling1;
 	float scalingSq1;
 	float scaling2;
@@ -161,19 +163,19 @@ private:
 	float scaling3;
 	float msVal1;
 	float msVal2;
-	float temp_sumInstVal1; // volatile?
-	float temp_sumSqInstVal1; // volatile?
+	float temp_sumInstVal1;
+	float temp_sumSqInstVal1;
 	float sumInstVal1;
 	float sumSqInstVal1;
-	float temp_sumInstVal2; // volatile?
-	float temp_sumSqInstVal2; // volatile?
+	float temp_sumInstVal2;
+	float temp_sumSqInstVal2;
 	float sumInstVal2;
 	float sumSqInstVal2;
 	float temp_sumInstPwr;
 	float sumInstPwr;
 	unsigned long newTime;
 	unsigned long oldTime;
-	unsigned int deltaT;
+	unsigned int dT;
 	float eAcc;
 };
 
@@ -188,12 +190,12 @@ public:
 	void update1(int _instVal);
 	void update2(int _instVal);
 	void publish(void);
-	float instVal1; // volatile?
-	float instVal2; // volatile?
+	float instVal1;
+	float instVal2;
 	float rmsVal1;
 	float rmsVal2;
-	int dcBias1; // volatile?
-	int dcBias2; // volatile?
+	int dcBias1;
+	int dcBias2;
 	float apparentPwr;
 	float realPwr;
 	float pf;
@@ -201,13 +203,13 @@ public:
 	bool acquire;
 	bool acqRdy;
 private:
-	bool blr; // baseline restore switch
+	bool blr;
 	bool mode;
 	int rmsWindow;
-	float const alpha=0.7; // baseline restoration filter constant
-	int error1; // volatile?
-	int error2; // volatile?
-	short sampleIdx; // volatile?
+	float const alpha=0.7;
+	int error1;
+	int error2;
+	short sampleIdx;
 	float scaling1;
 	float scalingSq1;
 	float scaling2;
@@ -215,19 +217,19 @@ private:
 	float scaling3;
 	float msVal1;
 	float msVal2;
-	float temp_sumInstVal1; // volatile?
-	float temp_sumSqInstVal1; // volatile?
+	float temp_sumInstVal1;
+	float temp_sumSqInstVal1;
 	float sumInstVal1;
 	float sumSqInstVal1;
-	float temp_sumInstVal2; // volatile?
-	float temp_sumSqInstVal2; // volatile?
+	float temp_sumInstVal2;
+	float temp_sumSqInstVal2;
 	float sumInstVal2;
 	float sumSqInstVal2;
 	float temp_sumInstPwr;
 	float sumInstPwr;
 	unsigned long newTime;
 	unsigned long oldTime;
-	unsigned int deltaT;
+	unsigned int dT;
 	float eAcc;
 };
 

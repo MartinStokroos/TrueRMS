@@ -1,6 +1,7 @@
-# True RMS Library for Arduino
-This repository contains the *TrueRMS* C++ library for Arduino. With this library it is possible to calculate the *average* value and the *rms* (root mean square) or *effective* value of a signal. With this library it is also possible to calculate the *(vector)power*, from both, voltage and current signals. The voltage and the voltage representation of a current, can be measured with the ADC of the Arduino by using appropriate input circuitry for scaling the measured quantities down to within the 0-5V compliant ADC input voltage range.
-The provided solution uses a simple method for scaling the units. The user only has to define the full scale peak-to-peak value of the ac input signal(s). This library is easy portable to other platforms.
+# True RMS Library for Arduino v1.3
+This repository contains the *TrueRMS* C++ library for Arduino. With this library it is possible to calculate the *average* value and the *rms* (root mean square) or *effective* value of the ADC input  signal. This library also calculates the *real-*, *apparent power* and the *power factor* from both, voltage and current input signals. From version 1.3, energy metering has been added to the project.
+
+The voltage and the voltage representation of a current can be measured with the ADC of the Arduino by using appropriate input circuitry for scaling the measured quantities down to within the 0-5V compliant voltage range of the ADC. The provided solution uses a simple method for scaling the measured quantities. The user only has to define the full scale peak-to-peak value of the AC input voltage and current. When the units of the measured quantities are defined in Volt and Ampere, then the calculated power is in Watt and the energy in Ws (Joules). This library is easy portable to other platforms.
 
 ## Function
 The following library classes are implemented:
@@ -12,7 +13,8 @@ The following library classes are implemented:
 * `Power2`
 
 *Average* calculates the average value from a number of input samples (usually) from the ADC. *Rms* or *Rms2* is meant to calculate the root-mean-square value of a signal and *Power* or *Power2* is meant to calculate the power from both voltage and current input.
-*Rms2* and *Power2* perform better when used in an interrupt service routine by better spreading out the processing burden over the sample time slots. The number of samples for one acquisition run (scan) is defined as the *window*. *Rms2* and *Power2* occupy one extra sample time slot (window+1) if the automatic baseline restoration option is on (BLR_ON).
+
+*Rms2* and *Power2* are performing better when used in an interrupt service routine by spreading out the processing burden over the sample time slots. The number of samples for one RMS acquisition run (scan) is defined as *window*. *Rms2* and *Power2* occupy one extra sample time slot (window length +1) when the automatic baseline restoration option is on (BLR_ON).
 
 The following methods exist:
 
@@ -24,13 +26,17 @@ The following methods exist:
 * `update2()`
 * `publish()`
 
-For the `Power2` class update() is broken down into `update1()` and `update2()`. `update1()` must be called first to process the sample from the input voltage and `update2()` to process the sample from the input current or vica versa(voltage-current). Sampling voltage and current usually happens sequentially in a multiplexed ADC and not simultaneously.
-
 ## Usage
+**For a quick start, see the example Arduino sketches below.**
+
+These are the steps to follow for a successful implementation:
+
 1. Initialize an instance of a class as defined above with the member function `begin()`. This method is for initializing and it needs input to set the scaling of the measurement units, the size of the sampling window, the number of bits of the used ADC (or input signal) and the acquisition mode (continuous scan/single scan).
 2. call `start()` to start the acquisition.
-3. call `update()` (`update1()` or `update2()` in case of `Power2`) repeatedly at a constant rate.
+3. call `update()` (or `update1()` + `update2()` for `Power2`) repeatedly at a constant rate.
 4. call `publish()` to obtain the results.
+
+For the `Power2` class update() is broken down into `update1()` and `update2()`. `update1()` must be called first to process the sample from the input voltage and `update2()` to process the sample from the input current or vica versa(voltage-current). Sampling voltage and current usually happens in sequence for a multiplexed ADC.
 
 ***
 
@@ -150,6 +156,8 @@ The public defined variables are:
 
 `float pf` - power factor
 
+`float energy` - netto energy
+
 `bool acquire` - status bit, TRUE if scan is pending
 
 ***
@@ -204,16 +212,18 @@ The public defined variables are:
 
 `float pf` - power factor
 
+`float energy` - netto energy
+
 `bool acquire` - status bit, TRUE if scan is pending
 
 ***
 
-## Example
+## Application example
 * First create an instance of the library object, for example we define *gridVolt*:
 ```
 Rms gridVolt;
 ```
-* Initialize the *gridVolt* on some place in your setup function:
+* Initialize *gridVolt* at some place in your setup function:
 ```
 void setup() {
 	...
@@ -263,17 +273,19 @@ void loop() { // loop must run at 1kHz
 
 `Measure_rms.ino` -  With this example, the RMS-value of the ADC input voltage is determined. 
 
-`AC_powermeter.ino` - This is an example for a complete AC-power measurement application. It needs voltage and a voltage representation of the current as input on two ADC-channels. It determines the apparent power, real power, power factor and the rms-values of the voltage and current.
+`AC_powermeter.ino` - This is an example of a complete AC-power measurement application. It needs both, voltage and a voltage representation of the current as the input of two ADC-channels. It calculates  the rms-value of the voltage and current, the apparent power, real power and power factor.
+
+`Energy.ino` Calculates the rms-value of the voltage and current, the real power and netto energy.
 
 ## AC-line measurements with the Arduino
 The simplest way to interface AC high voltages with the Arduino ADC is by using a voltage transducer, for example the *LV 25-P* voltage transducer from *LEM USA Inc.* This transducer provides galvanic isolation, scaling and level shifting in a single package. For current sensing, *LEM* also manufactures the *LEM_LA55-P*, with the same advantages as for the voltage transducer.
 
-If one prefers to build input scaling circuits from discrete components, a detailed design description is given in the application note [tiduay6c.pdf](http://www.ti.com/lit/ug/tiduay6c/tiduay6c.pdf) that belongs to the Voltage Source Inverter Reference Design from Texas Instruments Incorporated. Take notice of the warnings! The proposed circuits can easily be adapted to the 0-5V range for the Arduino.
+If one prefers to build input scaling circuits from discrete components, a detailed design description is given in the application note [tiduay6c.pdf](http://dev.ti.com/tirex/content/C2000Ware_DigitalPower_SDK_1_01_00_00/solutions/tidm_hv_1ph_dcac/docs/tiduay6.pdf) that belongs to the Voltage Source Inverter Reference Design from Texas Instruments Incorporated. Note the warnings! The proposed circuits can easily be adapted to the 0-5V range for the Arduino.
 
 At all times, USE AN ISOLATION TRANSFORMER FOR SAFETY!
 
 ## Future Developments
-Energy metering.
+3-phase power measuring.
 
 ## Acknowledgement
 A lot of time was saved in developing this library by using the alternative Arduino-IDE [Sloeber](https://eclipse.baeyens.it/). Sloeber is a wonderful Arduino plugin for Eclipse. Thanks to Jantje and his contributors!

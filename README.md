@@ -38,10 +38,8 @@ These are the steps to follow for a successful implementation:
 
 For the `Power2` class update() is broken down into `update1()` and `update2()`. `update1()` must be called first to process the sample from the input voltage and `update2()` to process the sample from the input current or vica versa(voltage-current). Sampling voltage and current usually happens in sequence for a multiplexed ADC.
 
-***
-
-### Average
-For the class *Average*, use:
+#### Average
+For the class *Average* use:
 
 `void begin(float range, unsigned char window, unsigned char nob, bool mode);`
 
@@ -51,19 +49,19 @@ With:
 - `window` the length of the sample window, expressed in a whole number of samples.
 - `nob` is the bit resolution of the input signal (ADC bit depth). Use the predefined constants: `ADC_8BIT`, `ADC_10BIT` or `ADC_12BIT`.
 - `mode` sets the mode to continuous scan or single scan. Use the predifined constants `CNT_SCAN` or `SGL_SCAN`.
-#
+
 `void start(void);`
 This method starts the acquisition for continuous scan and single scan mode.
-#
+
 `void stop(void);`
 This method stops the acquisition.
-#
+
 `void update(int instVal);`
 Assign the current sample value.
-#
+
 `void publish(void);`
 Publish the result(s) from the last completed acquisition run. The results are in the output variable(s) as defined next.
-#
+
 The public defined variables are:
 
 `int instVal` - the value of the last acquired sample
@@ -72,10 +70,8 @@ The public defined variables are:
 
 `bool acquire` -  status bit, TRUE when scan is pending.
 
-***
-
-### Rms or Rms2
-For the class *Rms* or *Rms2*, use:
+#### Rms or Rms2
+For the class *Rms* or *Rms2* use:
 
 `void begin(float range, unsigned char window, unsigned char nob, bool blr, bool mode);`
 
@@ -86,19 +82,19 @@ With:
 - `nob` is the bit resolution of the input signal, usually this is the ADC bit depth. Use the predefined constants: `ADC_8BIT`, `ADC_10BIT` or `ADC_12BIT`.
 - `blr` sets the automatically baseline restoration function on or off. Use the predifined constants `BLR_ON` or `BLR_OFF`.
 - `mode` sets the mode to continuous scan or single scan. Use the predifined constants `CNT_SCAN` or `SGL_SCAN`.
-#
+
 `void start(void);`
 This method starts the acquisition for continuous scan and single scan mode.
-#
+
 `void stop(void);`
 This method stops the acquisition.
-#
+
 `void update(int instVal);`
 Assign the current sample value.
-#
+
 `void publish(void);`
 Publish the result(s) from the last completed acquisition run. The results are in the output variable(s) as defined next.
-#
+
 The public defined variables are:
 
 `int instVal` - the value of the last acquired sample, restored to the baseline when BLR_ON
@@ -109,9 +105,7 @@ The public defined variables are:
 
 `bool acquire` - status bit, TRUE if scan is pending
 
-***
-
-### Power
+#### Power
 For the class *Power* use:
 
 `void begin(float range1, float range2, unsigned char window, unsigned char nob, bool blr, bool mode);`
@@ -123,19 +117,19 @@ With:
 - `nob` is the bit resolution of the input signal, usually this is the ADC bit depth. Use the predifined constants: `ADC_8BIT`, `ADC_10BIT` or `ADC_12BIT`.
 - `blr` sets the automatically baseline restoration function on or off. Use the predifined constants `BLR_ON` or `BLR_OFF`.
 - `mode` sets the mode to continuous scan or single scan. Use the predifined constants `CNT_SCAN` or `SGL_SCAN`.
-#
+
 `void start(void);`
 This method starts the acquisition for continuous scan and single scan mode.
-#
+
 `void stop(void);`
 This method stops the acquisition.
-#
+
 `void update(int instVal1, int instVal2);`
 Assign the current sample values (for example voltage and current) at once.
-#
+
 `void publish(void);`
 Publish the result(s) from the last completed acquisition run. The results are in the output variable(s) as defined next.
-#
+
 The public defined variables are:
 
 `int instVal1` - the value of the last acquired sample (voltage), restored to the baseline when BLR_ON
@@ -160,9 +154,7 @@ The public defined variables are:
 
 `bool acquire` - status bit, TRUE if scan is pending
 
-***
-
-### Power2
+#### Power2
 For the class *Power2* use:
 
 `void begin(float range1, float range2, unsigned char window, unsigned char nob, bool blr, bool mode);`
@@ -174,24 +166,24 @@ With:
 - `nob` is the bit resolution of the input signal, usually this is the ADC bit depth. Use the predifined constants: `ADC_8BIT`, `ADC_10BIT` or `ADC_12BIT`.
 - `blr` sets the automatically baseline restoration function on or off. Use the predifined constants `BLR_ON` or `BLR_OFF`.
 - `mode` sets the mode to continuous scan or single scan. Use the predifined constants `CNT_SCAN` or `SGL_SCAN`.
-#
+
 `void start(void);`
 This method starts the acquisition for continuous scan and single scan mode.
-#
+
 `void stop(void);`
 This method stops the acquisition.
-#
+
 `void update1(int instVal);`
 Assign the current sample value for example for the voltage.
-#
+
 `void update2(int instVal);`
 Assign the current sample value for example for the current.
 Call `update1()` and `update2()` alternately in the sampling loop.
-#
+
 `void publish(void);`
 Publish the result(s) from the last completed acquisition run.
 The results are available from the output variable(s) as defined next.
-#
+
 The public defined variables are:
 
 `int instVal1` - the value of the last acquired sample (voltage), restored to the baseline when BLR_ON
@@ -215,8 +207,6 @@ The public defined variables are:
 `float energy` - netto energy
 
 `bool acquire` - status bit, TRUE if scan is pending
-
-***
 
 ## Application example
 * First create an instance of the library object, for example we define *gridVolt*:

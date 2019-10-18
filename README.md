@@ -261,11 +261,11 @@ void loop() { // loop must run at 1kHz
 ## Example Arduino Sketches
 `Measure_avg.ino` - This example shows how to calculate the average value of a signal measured with the ADC.
 
-`Measure_rms.ino` -  With this example, the RMS-value of the ADC input voltage is determined. 
+`Measure_rms.ino` -  In this example the RMS-value of the ADC input voltage is determined. 
 
-`AC_powermeter.ino` - This is an example of a complete AC-power measurement application. It needs both, voltage and a voltage representation of the current as the input of two ADC-channels. It calculates  the rms-value of the voltage and current, the apparent power, real power and power factor.
+`AC_powermeter.ino` - This example demonstrates a complete AC-power measurement application. It needs both, voltage and a voltage representation of the current as the input of two ADC-channels. It calculates  the rms-values of the voltage and current, the apparent power, real power and power factor.
 
-`Energy.ino` Calculates the rms-value of the voltage and current, the real power and netto energy.
+`Energy_metering.ino` Shows the voltage, current, real power and netto energy in Wh.
 
 ## AC-line measurements with the Arduino
 The simplest way to interface AC high voltages with the Arduino ADC is by using a voltage transducer, for example the *LV 25-P* voltage transducer from *LEM USA Inc.* This transducer provides galvanic isolation, scaling and level shifting in a single package. For current sensing, *LEM* also manufactures the *LEM_LA55-P*, with the same advantages as for the voltage transducer.

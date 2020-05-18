@@ -24,7 +24,7 @@
  * If RMS_WINDOW + sample-rate does not match with the fundamental frequency of the input signal(s), fluctuations 
  * in the rms and power readings will occure.
  * 
- * In this example the powerMon update function is called from the ADC ISR. The Voltage and current are alternately sampled. 
+ * In this example the powerMon update function is called from the ADC ISR. Voltage and current are alternately sampled. 
  * The ADC samples at 6kHz (exact multiple of 50Hz), so the voltage and the current are both sampled at 3kHz.
  *
  */
@@ -77,7 +77,7 @@ void setup() {
   bitSet(ADCSRA, ADATE); // auto-trigger enabled
   bitSet(ADCSRA, ADIE); // ADC interrupt enabled
 
-  bitClear(ADCSRA, ADPS0);	// ADC clock prescaler set to 64 (250kHz). We'll lose some accuracy at this speed...
+  bitClear(ADCSRA, ADPS0); // ADC clock prescaler set to 64 (250kHz). We'll lose some accuracy at this speed...
   bitSet(ADCSRA, ADPS1);
   bitSet(ADCSRA, ADPS2);
   
@@ -85,7 +85,7 @@ void setup() {
   bitClear(ADCSRB, ADTS0); // select trigger from timer 1
   bitSet(ADCSRB, ADTS1);
   bitSet(ADCSRB, ADTS2);
-  bitSet(ADCSRA, ADSC);    // start conversion
+  bitSet(ADCSRA, ADSC); // start conversion
 
   /* TIMER1 configured for phase and frequency correct PWM (mode 8), top=ICR1 */
   bitSet(TCCR1B, CS10);   // prescaler=1

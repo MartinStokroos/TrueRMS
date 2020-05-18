@@ -2,7 +2,8 @@
  *
  * File: AC_powermeter_advanced.ino
  * Purpose: High resolution power measurement example running on interrupt basis.
- * Version: 1.0.0
+ * Version: 1.0.1
+ * Modified: 18-05-2020
  * Date: 18-05-2020
  * 
  * URL: https://github.com/MartinStokroos/TrueRMS
@@ -32,7 +33,7 @@
 #include <TrueRMS.h>  // https://github.com/MartinStokroos/TrueRMS
 
 #define PIN_LED 13 // Arduino LED
-#define LPERIOD 50000    // slow control loop period in us. In this case 50ms.
+#define LPERIOD 100000    // main loop period in us. In this case 100ms.
 
 //#define RMS_WINDOW 60   // rms window of 60 samples, means 1 periods @50Hz
 #define RMS_WINDOW 120   // rms window of 120 samples, means 2 periods @50Hz
@@ -120,14 +121,14 @@ void loop() {
 
   if(pubIdx <= 0) {
     publish=true;
-    pubIdx=20; //print every sec.
+    pubIdx=10; //print every sec.
   }
 
   if(publish) {
     digitalWrite(PIN_LED, HIGH);
     switch (printMuxIdx){
       case 0:
-    	  Serial.print(powerMon.rmsVal1, 1); // grid voltage [V]
+    	  Serial.print( round(powerMon.rmsVal1) ); // grid voltage [V]
     	  Serial.print(", ");
     	break;
       case 1:
@@ -135,11 +136,11 @@ void loop() {
         Serial.print(", ");
     	break;
       case 2:
-        Serial.print(powerMon.apparentPwr, 1); // [VA]
+        Serial.print( round(powerMon.apparentPwr) ); // [VA]
         Serial.print(", ");
       break;
       case 3:
-        Serial.print(powerMon.realPwr, 1); // [W]
+        Serial.print( round(powerMon.realPwr) ); // [W]
         Serial.print(", ");
       break;
       case 4:

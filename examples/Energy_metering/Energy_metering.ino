@@ -2,7 +2,8 @@
  *
  * File: Energy.ino
  * Purpose: TrueRMS library example project
- * Version: 1.0.0
+ * Version: 1.0.1
+ * Modified: 18-05-2020
  * Date: 10-10-2019
  * URL: https://github.com/MartinStokroos/TrueRMS
  * License: MIT License
@@ -16,8 +17,8 @@
  * 
  * The RMS_WINDOW defines the number of samples used to calculate the RMS-value. The length of the RMS_WINDOW must 
  * be specified as a whole number and must fit at least one cycle of the base frequency of the input signal.
- * If RMS_WINDOW + sample-rate does not match with the fundamental frequency of the input signal(s), a slow fluctuation 
- * in the rms and power readings will occure.
+ * If RMS_WINDOW + sample-rate does not match with the fundamental frequency of the input signal(s), slow fluctuations 
+ * in the rms values and power readings will occure.
  *
 */
 
@@ -63,13 +64,13 @@ void loop() {
 	cnt++;
 	if(cnt >= 500) { // publish every sec
 		acPower.publish();
-		Serial.print(acPower.rmsVal1, 1); // V
+		Serial.print(acPower.rmsVal1, 1); // [V]
 		Serial.print(", ");
-		Serial.print(acPower.rmsVal2, 1); // A
+		Serial.print(acPower.rmsVal2, 1); // [A]
 		Serial.print(", ");
-		Serial.print(acPower.realPwr, 1); // P
+		Serial.print(acPower.realPwr, 1); // [P]
 		Serial.print(", ");
-		Serial.println(acPower.energy/3600, 2); // Wh
+		Serial.println(acPower.energy/3600, 2); // [Wh]
 		cnt=0;
 	}
 
@@ -77,4 +78,3 @@ void loop() {
 	nextLoop += LPERIOD;  // set next loop time to current time + LOOP_PERIOD
 }
 // end of Energy.ino
-

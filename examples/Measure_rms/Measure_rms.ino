@@ -15,16 +15,19 @@
  * 
  * The number of samples used to capture the input signal, must be a whole number. The sample window, expressed in 
  * number of samples, must have a length equal to at least one cycle of the input signal. If this is not the case, 
- * a slow fluctuation in the rms and power readings will occure.
+ * slow fluctuations in the rms and power readings will occure.
  * 
 */
 
 #include <TrueRMS.h>
+#include <digitalWriteFast.h>
 
 #define LPERIOD 1000    // loop period time in us. In this case 1.0ms
 #define ADC_INPUT 0     // define the used ADC input channel
 #define RMS_WINDOW 40   // rms window of 40 samples, means 2 periods @50Hz
 //#define RMS_WINDOW 50   // rms window of 50 samples, means 3 periods @60Hz
+
+#define PIN_DEBUG 4
 
 unsigned long nextLoop;
 int adcVal;
@@ -32,15 +35,20 @@ int cnt=0;
 float VoltRange = 5.00; // The full scale value is set to 5.00 Volts but can be changed when using an
                         // input scaling circuit in front of the ADC.
 
-Rms readRms ; // create an instance of Rms.
+Rms readRms; // create an instance of Rms.
 
 
 void setup() {
   // run once:
   Serial.begin(115200);
+  pinMode(PIN_DEBUG, OUTPUT);
+  
 
   // configure for automatic base-line restoration and continuous scan mode:
-  readRms.begin(VoltRange, RMS_WINDOW, ADC_10BIT, BLR_ON, CNT_SCAN);
+  //readRms.begin(VoltRange, RMS_WINDOW, ADC_10BIT, BLR_ON, CNT_SCAN);
+  digitalWriteFast(PIN_DEBUG, HIGH);
+  readRms.begin(VoltRange, RMS_WINDOW, ADC_10BIT, BLR_OFF, CNT_SCAN);
+  digitalWriteFast(PIN_DEBUG, LOW);
   
   // configure for no base-line restauration and single scan mode:
   //readRms.begin(VoltRange, RMS_WINDOW, ADC_10BIT, BLR_OFF, SGL_SCAN);
@@ -55,8 +63,10 @@ void setup() {
 void loop() {
   // run repeatedly:
   adcVal = analogRead(ADC_INPUT); // read the ADC.
-  readRms.update(adcVal); // update 
-  //readRms.update(adcVal-512); // without automatic baseline restoration (BLR_OFF), 
+  //readRms.update(adcVal); // update
+
+  
+  readRms.update(adcVal-512); // without automatic baseline restoration (BLR_OFF), 
                                 // substract a fixed DC offset in ADC-units here.
 
   cnt++;
@@ -74,4 +84,3 @@ void loop() {
 }
 
 // end of Measure_rms.ino
-

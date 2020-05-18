@@ -2,7 +2,8 @@
  *
  * File: AC_powermeter.ino
  * Purpose: TrueRMS library example project
- * Version: 1.0.2
+ * Version: 1.0.3
+ * Modified: 18-05-2020
  * Date: 25-05-2019
  * URL: https://github.com/MartinStokroos/TrueRMS
  * License: MIT License
@@ -16,8 +17,8 @@
  * 
  * The RMS_WINDOW defines the number of samples used to calculate the RMS-value. The length of the RMS_WINDOW must 
  * be specified as a whole number and must fit at least one cycle of the base frequency of the input signal.
- * If RMS_WINDOW + sample-rate does not match with the fundamental frequency of the input signal(s), a slow fluctuation 
- * in the rms and power readings will occure.
+ * If RMS_WINDOW + sample-rate does not match with the fundamental frequency of the input signal(s), slow fluctuations
+ * in the rms vulues and power readings will occure.
  *
 */
 
@@ -85,4 +86,3 @@ void loop() {
 }
 
 // end of AC_powermeter.ino
-

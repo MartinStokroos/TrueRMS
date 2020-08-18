@@ -1,10 +1,9 @@
 /*
- *
  * File: AC_powermeter_advanced.ino
  * Purpose: High resolution power measurement example running on interrupt basis.
- * Version: 1.0.1
- * Modified: 18-05-2020
- * Date: 18-05-2020
+ * Version: 1.1.0
+ * Modified: 18-08-2020
+ * Release date: 18-05-2020
  * 
  * URL: https://github.com/MartinStokroos/TrueRMS
  * 
@@ -13,20 +12,28 @@
  * Copyright (c) M.Stokroos 2020
  *
  *
- * This is an example of a complete AC-power meter application, measuring apparent power, real power, power factor,
- * rms voltage and current. Use external electronic circuitry to scale down the AC-voltage or current to be 
- * compliant with the ADC input voltage range of 0-5V. To measure ac-line voltages, use a differential amplifier+level 
- * shifter circuit with resistive voltage dividers at the input. Use for example a current sensor with a Hall sensor
- * based on the zero flux method. ALWAYS USE AN ISOLATION TRANSFORMER FOR SAFETY!
+ * This example measures the rms-voltage, rms-current, apparent power, real power, power factor and net energy. 
+ * 
+ * Use external electronic circuitry to scale down the AC-voltage or current to be compliant with the ADC input 
+ * voltage range of 0-5V. To measure the line voltage use for example a differential amplifier+levelshifter 
+ * circuit with resistive voltage dividers at the input and a current sensor with Hall-sensor 
+ * based on the zero flux method.
+ * 
+ * ALWAYS USE AN ISOLATION TRANSFORMER FOR SAFETY!
  * 
  * The RMS_WINDOW defines the number of samples used to calculate the RMS-value. The length of the RMS_WINDOW must 
  * be specified as a whole number and must fit at least one cycle of the base frequency of the input signal.
- * If RMS_WINDOW + sample-rate does not match with the fundamental frequency of the input signal(s), fluctuations 
- * in the rms and power readings will occure.
- * 
- * In this example the powerMon update function is called from the ADC ISR. Voltage and current are alternately sampled. 
- * The ADC samples at 6kHz (exact multiple of 50Hz), so the voltage and the current are both sampled at 3kHz.
+ * If RMS_WINDOW + sample-rate does not match with the fundamental frequency of the input signal, slow fluctuations 
+ * in the rms values and power readings will occure.
  *
+ * Arduino analog input pin mapping:
+ * AN0 = scaled ac mains voltage, biased on 2.5V DC.
+ * AN1 = scaled ac current, biased on 2.5V DC
+ * 
+ * Added to version 1.1.0:
+ * ADC clip detection and input bias voltage check. The LED will flash if the ADC clips and the LED will turn on 
+ * when the AN0 and/or AN1 DC offset is out of range.
+ * 
  */
 
 
@@ -34,15 +41,20 @@
 
 #define PIN_LED 13 // Arduino LED
 #define LPERIOD 100000    // main loop period in us. In this case 100ms.
+#define ADCMAX 500 // ADC peak amplitude
+#define BIAS_UPPER_LIM 522 // upper limit for DC bias
+#define BIAS_LOWER_LIM 500 // lower limit for DC bias
 
 //#define RMS_WINDOW 60   // rms window of 60 samples, means 1 periods @50Hz
 #define RMS_WINDOW 120   // rms window of 120 samples, means 2 periods @50Hz
 
 //scaling of measured quantities
 const int gridVoltRange = 750.0; // Vpeak-to-peak full scale.
-const float currRange = 111.5; // Apeak-to-peak full scale. Calibration value found for the LEM LTS-15-NP current transducer.
+const float currRange = 111.5; // Apeak-to-peak full scale. Calibration value for the LEM LTS-15-NP current transducer.
 
 volatile int adcVal;
+volatile boolean adcClip = false;
+volatile unsigned int clipCount;
 unsigned long nextLoop;
 unsigned char printMuxIdx = 0;
 bool publish;
@@ -119,19 +131,34 @@ void setup() {
 void loop() {
   powerMon.publish();
 
+  // Check ADC signal integrity
+  if ( (powerMon.dcBias1 <= BIAS_LOWER_LIM) || (powerMon.dcBias1 >= BIAS_UPPER_LIM) || \ 
+  (powerMon.dcBias2 <= BIAS_LOWER_LIM) || (powerMon.dcBias2 >= BIAS_UPPER_LIM) ) { adcClip=true; }
+  
+  if (adcClip) { digitalWrite(PIN_LED, HIGH); }
+  else { digitalWrite(PIN_LED, LOW); }
+
+  clipCount++;
+  clipCount &= 0x0F;
+  // reset adcClip flag
+  if (clipCount==0){
+     adcClip=false ;
+  }
+
   if(pubIdx <= 0) {
     publish=true;
     pubIdx=10; //print every sec.
   }
 
   if(publish) {
-    digitalWrite(PIN_LED, HIGH);
     switch (printMuxIdx){
       case 0:
+        //Serial.print(powerMon.dcBias1); // for debugging: print bias1 [ADC steps]
     	  Serial.print( round(powerMon.rmsVal1) ); // grid voltage [V]
     	  Serial.print(", ");
     	break;
       case 1:
+        //Serial.print(powerMon.dcBias2); // for debugging: print bias2 [ADC steps]
         Serial.print(powerMon.rmsVal2, 1); // current [A]
         Serial.print(", ");
     	break;
@@ -152,7 +179,6 @@ void loop() {
     	  Serial.println();
       break;
     }
-    digitalWrite(PIN_LED, LOW);
     
     if(printMuxIdx == 5) {
 		  Serial.println();
@@ -185,10 +211,16 @@ ISR(ADC_vect)
   if (ADMUX & 1) { // sampling @ 3kHz
     powerMon.update2(adcVal);
     ADMUX = (ADMUX & B11110000) | 0x00;
+    // clip detection
+    if (powerMon.instVal2 > ADCMAX) {adcClip=true;}
+    if (powerMon.instVal2 < -ADCMAX) {adcClip=true;}
   }
   else {
     powerMon.update1(adcVal);
     ADMUX = (ADMUX & B11110000) | 0x01;
+    // clip detection
+    if (powerMon.instVal1 > ADCMAX) {adcClip=true;}
+    if (powerMon.instVal1 < -ADCMAX) {adcClip=true;}
   }
 }
 

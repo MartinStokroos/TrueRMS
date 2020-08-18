@@ -265,9 +265,9 @@ void loop() { // loop must run at 1kHz
 
 `AC_powermeter.ino` - This example demonstrates a complete AC-power measurement application. It needs both, voltage and a voltage representation of the current as input on two ADC-channels. It calculates  the rms-values of the voltage and current, the apparent power, real power and power factor.
 
-`AC_powermeter_advanced.ino` - This example also demonstrates a complete AC-power measurement application. It runs on interrupt basis. Voltage and current are both sampled at 3kHz. The resolution and stability of the readings is better than from the no-interrupt versions.
+`AC_powermeter_advanced.ino` - This example also demonstrates a complete AC-power measurement application. It runs on interrupt basis for getting better stable readings. Voltage and current are both sampled at 3kHz. When the Arduino led is lit, the ADC clips (too high input peak voltage) or the dc bias it out of range.
 
-`Energy_metering.ino` Shows the voltage, current, real power and netto energy in Wh.
+`Energy_metering.ino` Shows the voltage, current, real power and net energy in Wh.
 
 ## AC-line measurements with the Arduino
 The simplest way to interface AC high voltages with the Arduino ADC is by using a voltage transducer, for example the *LV 25-P* voltage transducer from *LEM USA Inc.* This transducer provides galvanic isolation, scaling and level shifting in a single package. For current sensing, *LEM* also manufactures the *LEM_LA55-P*, with the same advantages as for the voltage transducer.
@@ -277,7 +277,7 @@ If one prefers to build input scaling circuits from discrete components, a detai
 At all times, USE AN ISOLATION TRANSFORMER FOR SAFETY!
 
 ## Future Developments
-3-phase power measuring.
+3-phase power measurement.
 
 ## Acknowledgement
 A lot of time was saved in developing this library by using the alternative Arduino-IDE [Sloeber](https://eclipse.baeyens.it/). Sloeber is a wonderful Arduino plugin for Eclipse. Thanks to Jantje and his contributors!

@@ -2,8 +2,10 @@
  *
  * File: Measure_rms.ino
  * Purpose: TrueRMS library example project
- * Version: 1.0.2
+ * Version: 1.0.3
  * Date: 23-05-2019
+ * last update: 30-09-2020
+ * 
  * URL: https://github.com/MartinStokroos/TrueRMS
  * License: MIT License
  *
@@ -20,7 +22,8 @@
 */
 
 #include <TrueRMS.h>
-#include <digitalWriteFast.h>
+#include <digitalWriteFast.h> // It uses digitalWriteFast only for the purpose of debugging!
+                              // https://code.google.com/archive/p/digitalwritefast/downloads
 
 #define LPERIOD 1000    // loop period time in us. In this case 1.0ms
 #define ADC_INPUT 0     // define the used ADC input channel
@@ -45,12 +48,10 @@ void setup() {
   
 
   // configure for automatic base-line restoration and continuous scan mode:
-  //readRms.begin(VoltRange, RMS_WINDOW, ADC_10BIT, BLR_ON, CNT_SCAN);
-  digitalWriteFast(PIN_DEBUG, HIGH);
-  readRms.begin(VoltRange, RMS_WINDOW, ADC_10BIT, BLR_OFF, CNT_SCAN);
-  digitalWriteFast(PIN_DEBUG, LOW);
+  readRms.begin(VoltRange, RMS_WINDOW, ADC_10BIT, BLR_ON, CNT_SCAN);
+  //readRms.begin(VoltRange, RMS_WINDOW, ADC_10BIT, BLR_OFF, CNT_SCAN);
   
-  // configure for no base-line restauration and single scan mode:
+  // configure for no baseline restauration and single scan mode:
   //readRms.begin(VoltRange, RMS_WINDOW, ADC_10BIT, BLR_OFF, SGL_SCAN);
   
   readRms.start(); //start measuring
@@ -65,14 +66,15 @@ void loop() {
   adcVal = analogRead(ADC_INPUT); // read the ADC.
   //readRms.update(adcVal); // update
 
-  
-  readRms.update(adcVal-512); // without automatic baseline restoration (BLR_OFF), 
-                                // substract a fixed DC offset in ADC-units here.
+  digitalWriteFast(PIN_DEBUG, HIGH);
+  readRms.update(adcVal); // for BLR_ON or for DC(+AC) signals with BLR_OFF
+  //readRms.update(adcVal-512); // without automatic baseline restoration (BLR_OFF); substract a fixed DC offset in ADC-units here.
+  digitalWriteFast(PIN_DEBUG, LOW);                                
 
   cnt++;
   if(cnt >= 500) { // publish every 0.5s
     readRms.publish();
-    Serial.print(readRms.rmsVal,3);
+    Serial.print(readRms.rmsVal,2);
     Serial.print(", ");
     Serial.println(readRms.dcBias);
     cnt=0;

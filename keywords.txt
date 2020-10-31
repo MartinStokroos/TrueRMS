@@ -18,6 +18,8 @@ Power2			KEYWORD1
 
 begin			KEYWORD2
 update			KEYWORD2
+update1			KEYWORD2
+update2			KEYWORD2
 publish			KEYWORD2
 start			KEYWORD2
 stop			KEYWORD2
